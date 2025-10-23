@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tech Orbit</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(to bottom, #0a0e27 0%, #1a1f3a 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+        
+        .orbit-container {
+            position: relative;
+            width: 600px;
+            height: 600px;
+        }
+        
+        .earth {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #60a5fa 100%);
+            border-radius: 50%;
+            box-shadow: 
+                0 0 40px rgba(59, 130, 246, 0.6),
+                inset -20px -20px 40px rgba(0, 0, 0, 0.3),
+                inset 20px 20px 40px rgba(255, 255, 255, 0.1);
+            animation: earthRotate 20s linear infinite;
+            z-index: 10;
+        }
+        
+        .earth::before {
+            content: '🌍';
+            position: absolute;
+            font-size: 100px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        
+        @keyframes earthRotate {
+            from { transform: translate(-50%, -50%) rotate(0deg); }
+            to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+        
+        .orbit {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            border: 2px solid rgba(59, 130, 246, 0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+        }
+        
+        .orbit-1 { width: 240px; height: 240px; animation: rotate 12s linear infinite; }
+        .orbit-2 { width: 340px; height: 340px; animation: rotate 18s linear infinite; }
+        .orbit-3 { width: 440px; height: 440px; animation: rotate 24s linear infinite; }
+        .orbit-4 { width: 540px; height: 540px; animation: rotate 30s linear infinite; }
+        
+        @keyframes rotate {
+            from { transform: translate(-50%, -50%) rotate(0deg); }
+            to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+        
+        .tech {
+            position: absolute;
+            width: 70px;
+            height: 70px;
+            background: rgba(30, 41, 59, 0.9);
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            border: 2px solid;
+            transition: transform 0.3s ease;
+        }
+        
+        .tech:hover {
+            transform: scale(1.2);
+            z-index: 100;
+        }
+        
+        .tech img {
+            width: 40px;
+            height: 40px;
+            object-fit: contain;
+        }
+        
+        .tech span {
+            font-size: 10px;
+            color: white;
+            margin-top: 4px;
+            font-family: 'Arial', sans-serif;
+            font-weight: bold;
+        }
+        
+        /* Positioning technologies on orbits */
+        .tech-angular {
+            top: 0;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border-color: #dd0031;
+        }
+        
+        .tech-react {
+            top: 50%;
+            right: 0;
+            transform: translate(50%, -50%);
+            border-color: #61dafb;
+        }
+        
+        .tech-docker {
+            bottom: 0;
+            left: 50%;
+            transform: translate(-50%, 50%);
+            border-color: #2496ed;
+        }
+        
+        .tech-typescript {
+            top: 50%;
+            left: 0;
+            transform: translate(-50%, -50%);
+            border-color: #3178c6;
+        }
+        
+        .tech-nestjs {
+            top: 15%;
+            right: 15%;
+            transform: translate(0, 0);
+            border-color: #e0234e;
+        }
+        
+        .tech-laravel {
+            bottom: 15%;
+            right: 15%;
+            border-color: #ff2d20;
+        }
+        
+        .tech-java {
+            bottom: 15%;
+            left: 15%;
+            border-color: #ed8b00;
+        }
+        
+        .tech-html {
+            top: 15%;
+            left: 15%;
+            border-color: #e34f26;
+        }
+        
+        .stars {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 3s ease-in-out infinite;
+        }
+        
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="orbit-container">
+        <!-- Stars background -->
+        <div class="stars" id="stars"></div>
+        
+        <!-- Orbits -->
+        <div class="orbit orbit-1">
+            <div class="tech tech-angular">
+                <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/angularjs/angularjs-original.svg" alt="Angular">
+                <span>Angular</span>
+            </div>
+            <div class="tech tech-react">
+                <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg" alt="React">
+                <span>React</span>
+            </div>
+        </div>
+        
+        <div class="orbit orbit-2">
+            <div class="tech tech-typescript">
+                <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg" alt="TypeScript">
+                <span>TypeScript</span>
+            </div>
+            <div class="tech tech-docker">
+                <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/docker/docker-original.svg" alt="Docker">
+                <span>Docker</span>
+            </div>
+        </div>
+        
+        <div class="orbit orbit-3">
+            <div class="tech tech-nestjs">
+                <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nestjs/nestjs-original.svg" alt="NestJS">
+                <span>NestJS</span>
+            </div>
+            <div class="tech tech-laravel">
+                <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/laravel/laravel-original.svg" alt="Laravel">
+                <span>Laravel</span>
+            </div>
+        </div>
+        
+        <div class="orbit orbit-4">
+            <div class="tech tech-java">
+                <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/java/java-original.svg" alt="Java">
+                <span>Java</span>
+            </div>
+            <div class="tech tech-html">
+                <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/html5/html5-original.svg" alt="HTML5">
+                <span>HTML5</span>
+            </div>
+        </div>
+        
+        <!-- Earth in center -->
+        <div class="earth"></div>
+    </div>
+    
+    <script>
+        // Create random stars
+        const starsContainer = document.getElementById('stars');
+        for (let i = 0; i < 100; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
+            star.style.left = Math.random() * 100 + '%';
+            star.style.top = Math.random() * 100 + '%';
+            star.style.animationDelay = Math.random() * 3 + 's';
+            starsContainer.appendChild(star);
+        }
+    </script>
+</body>
+</html>
