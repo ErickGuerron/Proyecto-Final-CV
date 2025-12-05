@@ -1,0 +1,93 @@
+# ============================
+# Dependencias PHP (Composer)
+# ============================
+/vendor/
+composer.phar
+
+# Nota: normalmente composer.lock NO se ignora,
+# se recomienda versionarlo para fijar versiones de dependencias.
+
+
+# ============================
+# Dependencias JavaScript
+# (por si usas npm / yarn / pnpm)
+# ============================
+/node_modules/
+npm-debug.log*
+yarn-error.log*
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
+pnpm-debug.log*
+
+
+# ============================
+# Builds y assets generados
+# (CSS/JS minificado, bundles, etc.)
+# ============================
+/dist/
+/build/
+/public/build/
+/public/js/*.map
+/public/css/*.map
+/.parcel-cache/
+/.cache/
+/.tmp/
+
+
+# ============================
+# Archivos de configuración sensibles
+# (variables de entorno, credenciales, etc.)
+# ============================
+.env
+.env.*
+!.env.example
+
+
+# ============================
+# Logs y cachés
+# ============================
+*.log
+logs/
+log/
+tmp/
+temp/
+cache/
+storage/
+sessions/
+debugbar/
+.phpunit.result.cache
+
+
+# ============================
+# Archivos de IDE / Editor
+# ============================
+.vscode/
+.idea/
+*.iml
+.nbproject/
+*.sublime-project
+*.sublime-workspace
+.vscode-test/
+
+
+# ============================
+# Archivos del sistema operativo
+# ============================
+.DS_Store
+.DS_Store?
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+Icon?
+$RECYCLE.BIN/
+
+
+# ============================
+# Cobertura de pruebas / reportes
+# ============================
+/coverage/
+/reports/
+/phpunit.xml.cache
+/.php-cs-fixer.cache
+/.phpstorm.meta.php
