@@ -1,8 +1,8 @@
 <?php
     class EnlacesPagina{
-        public static function enlacesPaginasModel($enlacesModel){
-            if($enlacesModel == "inicio" || $enlacesModel == "servicios" || $enlacesModel == "nosotros" || $enlacesModel == "contactanos" || $enlacesModel == "auth"){
-                $modulo = "views/".$enlacesModel.".php";
+        public static function enlacesPaginasModel($action){
+            if($action == "inicio" || $action == "servicios" || $action == "nosotros" || $action == "contactanos"){
+                $modulo = "views/".$action.".php";
             } else {
                 $modulo="views/inicio.php";
             }
