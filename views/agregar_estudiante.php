@@ -1,25 +1,13 @@
 <div class="container my-4">
     <div class="card p-4 shadow-sm">
-        <?php if ($_SESSION['user']['ROL_USU'] === 'ADMIN' || $_SESSION['user']['ROL_USU'] === 'SECRETARIO'): ?>
-            <h1 class="mb-3 text-primary">Reportes de Servicios</h1>
-            <p class="lead">Aquí se mostrarán los reportes relacionados con los servicios.</p>
-            <p>Funcionalidad de reportes pendiente de implementación.</p>
-        <?php else: ?>
-            <h1 class="mb-3 text-primary">Página de Servicios</h1>
-            <p class="lead">Explora la amplia gama de servicios académicos que ofrecemos en Tech Indigo Académico.</p>
-            <p>Este es un contenido de marcador de posición para la página de servicios.</p>
-        <?php endif; ?>
-    </div>
-    <?php if ($_SESSION['user']['ROL_USU'] === 'SECRETARIO'): ?>
-    <div class="card p-4 shadow-sm mt-4">
-        <h2 class="mb-3 text-secondary">Agregar Estudiante</h2>
+        <h1 class="mb-3 text-primary">Agregar Estudiante</h1>
         <?php if (isset($_SESSION['success_message'])): ?>
             <div class="alert alert-success"><?php echo $_SESSION['success_message']; unset($_SESSION['success_message']); ?></div>
         <?php endif; ?>
         <?php if (isset($_SESSION['error'])): ?>
             <div class="alert alert-danger"><?php echo $_SESSION['error']; unset($_SESSION['error']); ?></div>
         <?php endif; ?>
-        <form action="index.php?action=servicios" method="POST">
+        <form action="index.php?action=agregar_estudiante" method="POST">
             <div class="mb-3">
                 <label for="nom_est" class="form-label">Nombre</label>
                 <input type="text" class="form-control" id="nom_est" name="nom_est" required>
@@ -47,5 +35,4 @@
             <button type="submit" class="btn btn-primary">Agregar Estudiante</button>
         </form>
     </div>
-    <?php endif; ?>
 </div>

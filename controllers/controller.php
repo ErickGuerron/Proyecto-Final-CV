@@ -2,6 +2,7 @@
 include_once "./models/redirect.php";
 include_once "./models/database.php";
 include_once "./models/user.php";
+include_once "./models/estudiante.php";
 
 class EnlacesPaginaController
 {   
@@ -21,7 +22,7 @@ class EnlacesPaginaController
 
         // Define access rules
         $allowedPublic = ["inicio", "contactanos"];
-        $restricted = ["servicios", "nosotros"];
+        $restricted = ["servicios", "nosotros", "agregar_estudiante"];
 
         if (in_array($action, $restricted)) {
             if (!isset($_SESSION['user'])) {
@@ -41,11 +42,44 @@ class EnlacesPaginaController
                 header('Location: index.php?action=inicio');
                 exit();
             }
+            if ($action === "agregar_estudiante" && $userRole !== 'SECRETARIO') {
+                $_SESSION['error'] = "Acceso denegado. Solo SECRETARIO puede acceder.";
+                header('Location: index.php?action=inicio');
+                exit();
+            }
+        }
+
+        if (in_array($action, ["agregar_estudiante", "servicios", "nosotros"]) && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['nom_est'])) {
+            $this->agregarEstudianteController();
+            return;
         }
 
         $respuesta=EnlacesPagina::enlacesPaginasModel($action);
         
         include $respuesta;
+    }
+
+    public function agregarEstudianteController()
+    {
+        $estudianteModel = new Estudiante();
+        $datos = [
+            'NOM_EST' => $_POST['nom_est'],
+            'APE_EST' => $_POST['ape_est'],
+            'TEL_EST' => $_POST['tel_est'],
+            'COR_EST' => $_POST['cor_est'],
+            'DIR_EST' => $_POST['dir_est'],
+            'FEC_NAC' => $_POST['fec_nac']
+        ];
+
+        try {
+            $id = $estudianteModel->agregarEstudiante($datos);
+            $_SESSION['success_message'] = "Estudiante agregado exitosamente con ID: " . $id;
+        } catch (Exception $e) {
+            $_SESSION['error'] = "Error al agregar estudiante: " . $e->getMessage();
+        }
+
+        header('Location: index.php?action=' . $_GET['action']);
+        exit();
     }
 
     public function loginController()
