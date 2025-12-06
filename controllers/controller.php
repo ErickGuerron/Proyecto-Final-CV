@@ -11,9 +11,9 @@ class EnlacesPaginaController
     {
         if (isset($_GET["accion"])) {
             $enlacesController = $_GET["accion"];
-        } else 
+        } else
         {
-            $enlacesController="auth";
+            $enlacesController="inicio";
         }
         $respuesta=EnlacesPagina::enlacesPaginasModel($enlacesController);
         include $respuesta;
