@@ -50,12 +50,16 @@
                                     <a class="nav-link" href="index.php?action=servicios">Servicios</a>
                                 </li>
                             <?php endif; ?>
-                            <?php if ($_SESSION['user']['ROL_USU'] === 'SECRETARIO'): ?>
+                            <?php if ($_SESSION['user']['ROL_USU'] === 'SECRETARIO' || $_SESSION['user']['ROL_USU'] === 'ADMIN'): ?>
                                 <li class="nav-item">
                                     <a class="nav-link" href="index.php?action=nosotros">Nosotros</a>
                                 </li>
                             <?php endif; ?>
-                            <li class="nav-item ms-lg-3">
+                            <li class="nav-item ms-lg-3 d-flex align-items-center">
+                                <span class="navbar-text me-3 text-white">
+                                    <i class="bi bi-person-circle me-1"></i>
+                                    <?php echo htmlspecialchars($_SESSION['user']['ROL_USU']); ?>
+                                </span>
                                 <a href="index.php?action=logout" class="btn btn-outline-light btn-sm rounded-pill px-3">
                                     <i class="bi bi-box-arrow-right me-1"></i> Salir
                                 </a>
@@ -88,14 +92,12 @@
         <?php
             // Display success/error messages
             if (isset($_SESSION['success_message'])) {
-                echo '<div class="container mt-4"><div class="alert alert-success text-center" role="alert">' . $_SESSION['success_message'] . '</div></div>';
+                echo '<div class="container mt-4"><div class="alert alert-success alert-dismissible fade show text-center" role="alert" id="auto-dismiss-alert">' . $_SESSION['success_message'] . '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div></div>';
                 unset($_SESSION['success_message']);
-            } elseif (isset($_GET['msg']) && $_GET['msg'] == 'logout_success') {
-                echo '<div class="container mt-4"><div class="alert alert-success text-center" role="alert">¡Sesión cerrada exitosamente!</div></div>';
             }
             if (isset($_SESSION['error'])) {
                  echo '<div class="container mt-4"><div class="alert alert-danger text-center" role="alert">' . $_SESSION['error'] . '</div></div>';
-                unset($_SESSION['error']);
+                // Don't unset error on page load, unset it on successful login
             }
 
             $mvc = new EnlacesPaginaController();
@@ -117,7 +119,7 @@
                     <h6 class="fw-bold mb-3 text-dark-custom">Enlaces</h6>
                     <ul class="list-unstyled small text-muted d-flex flex-column gap-2">
                         <li><a href="index.php?action=inicio" class="text-decoration-none text-muted">Inicio</a></li>
-                        <li><a href="index.php?action=nosotros" class="text-decoration-none text-muted">Nosotros</a></li>
+                        <li><a href="index.php?action=contactanos" class="text-decoration-none text-muted">Contáctanos</a></li>
                     </ul>
                 </div>
                 <div class="col-lg-3">
@@ -146,5 +148,15 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Auto-dismiss alert
+        const autoDismissAlert = document.getElementById('auto-dismiss-alert');
+        if (autoDismissAlert) {
+            setTimeout(() => {
+                const bsAlert = new bootstrap.Alert(autoDismissAlert);
+                bsAlert.close();
+            }, 2000);
+        }
+    </script>
 </body>
 </html>

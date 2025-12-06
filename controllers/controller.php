@@ -36,7 +36,7 @@ class EnlacesPaginaController
                 header('Location: index.php?action=inicio');
                 exit();
             }
-            if ($action === "nosotros" && $userRole !== 'SECRETARIO') {
+            if ($action === "nosotros" && !in_array($userRole, ['ADMIN', 'SECRETARIO'])) {
                 $_SESSION['error'] = "Acceso denegado.";
                 header('Location: index.php?action=inicio');
                 exit();
@@ -50,12 +50,19 @@ class EnlacesPaginaController
 
     public function loginController()
     {
+        // Check if it's an AJAX request
+        $isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest';
+
         $email = $_POST['email'] ?? '';
         $password = $_POST['password'] ?? '';
         $referrer = $_POST['referrer'] ?? 'index.php?action=inicio';
 
-
         if (empty($email) || empty($password)) {
+            if ($isAjax) {
+                header('Content-Type: application/json');
+                echo json_encode(['success' => false, 'message' => 'Por favor, ingrese correo y contraseña.']);
+                exit();
+            }
             $_SESSION['error'] = "Por favor, ingrese correo y contraseña.";
             header('Location: ' . $referrer . '&login_error=1');
             exit();
@@ -69,9 +76,19 @@ class EnlacesPaginaController
             $_SESSION['success_message'] = "¡Inicio de sesión exitoso!";
             unset($_SESSION['error']);
             
+            if ($isAjax) {
+                header('Content-Type: application/json');
+                echo json_encode(['success' => true, 'redirect' => 'index.php?action=servicios']);
+                exit();
+            }
             header('Location: index.php?action=servicios');
             exit();
         } else {
+            if ($isAjax) {
+                header('Content-Type: application/json');
+                echo json_encode(['success' => false, 'message' => 'Credenciales incorrectas.']);
+                exit();
+            }
             $_SESSION['error'] = "Credenciales incorrectas.";
             header('Location: ' . $referrer . '&login_error=1');
             exit();
@@ -82,7 +99,7 @@ class EnlacesPaginaController
     {
         session_unset();
         session_destroy();
-        header("Location: index.php?action=inicio&msg=logout_success");
+        header("Location: index.php?action=inicio");
         exit();
     }
 }
