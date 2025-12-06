@@ -1,7 +1,6 @@
 <?php
 // views/template.php
-session_start(); // Aseguramos inicio de sesión PHP
-$sessionActive = isset($_SESSION['user']);
+// session_start() is already called in index.php
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -13,7 +12,7 @@ $sessionActive = isset($_SESSION['user']);
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-    <!-- CSS Personalizado (Estrictamente Tech Indigo) -->
+    <!-- CSS Personalizado -->
     <link rel="stylesheet" type="text/css" href="assets/css/style.css">
 </head>
 <body class="d-flex flex-column min-vh-100">
@@ -29,59 +28,55 @@ $sessionActive = isset($_SESSION['user']);
     <header class="sticky-top">
         <nav class="navbar navbar-expand-lg navbar-glass navbar-dark">
             <div class="container">
-                <a class="navbar-brand d-flex align-items-center gap-2" href="?accion=inicio">
+                <a class="navbar-brand d-flex align-items-center gap-2" href="index.php?action=inicio">
                     <i class="bi bi-cpu-fill text-warning"></i> 
                     <span>Tech Indigo</span>
                 </a>
-
                 <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-
                 <div class="collapse navbar-collapse" id="navbarMain">
                     <ul class="navbar-nav ms-auto align-items-center gap-1">
-                        <!-- Inicio -->
                         <li class="nav-item">
-                            <a class="nav-link <?php echo (!isset($_GET['accion']) || $_GET['accion'] == 'inicio') ? 'active' : ''; ?>" href="?accion=inicio">Inicio</a>
+                            <a class="nav-link" href="index.php?action=inicio">Inicio</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="index.php?action=contactanos">Contáctanos</a>
                         </li>
                         
-                        <!-- Nosotros -->
-                        <li class="nav-item">
-                            <a class="nav-link <?php echo (isset($_GET['accion']) && $_GET['accion'] == 'nosotros') ? 'active' : ''; ?>" href="?accion=nosotros">Nosotros</a>
-                        </li>
-
-                        <!-- Servicios (Lógica PHP de Bloqueo) -->
-                        <li class="nav-item">
-                            <?php if($sessionActive): ?>
-                                <!-- Usuario Logueado: Acceso total -->
-                                <a class="nav-link <?php echo (isset($_GET['accion']) && $_GET['accion'] == 'servicios') ? 'active' : ''; ?>" href="?accion=servicios">
-                                    Servicios
+                        <?php if (isset($_SESSION['user'])): ?>
+                            <?php if ($_SESSION['user']['ROL_USU'] === 'SECRETARIO' || $_SESSION['user']['ROL_USU'] === 'ADMIN'): ?>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="index.php?action=servicios">Servicios</a>
+                                </li>
+                            <?php endif; ?>
+                            <?php if ($_SESSION['user']['ROL_USU'] === 'SECRETARIO'): ?>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="index.php?action=nosotros">Nosotros</a>
+                                </li>
+                            <?php endif; ?>
+                            <li class="nav-item ms-lg-3">
+                                <a href="index.php?action=logout" class="btn btn-outline-light btn-sm rounded-pill px-3">
+                                    <i class="bi bi-box-arrow-right me-1"></i> Salir
                                 </a>
-                            <?php else: ?>
-                                <!-- Usuario NO Logueado: Candado + Trigger Modal -->
+                            </li>
+                        <?php else: ?>
+                            <li class="nav-item">
                                 <a class="nav-link locked" href="#" data-bs-toggle="modal" data-bs-target="#loginModal" title="Requiere autenticación">
                                     <i class="bi bi-lock-fill small"></i> Servicios
                                 </a>
-                            <?php endif; ?>
-                        </li>
-
-                        <!-- Contactanos -->
-                        <li class="nav-item">
-                            <a class="nav-link <?php echo (isset($_GET['accion']) && $_GET['accion'] == 'contactanos') ? 'active' : ''; ?>" href="?accion=contactanos">Contáctanos</a>
-                        </li>
-
-                        <!-- Botón Login / Logout -->
-                        <li class="nav-item ms-lg-3">
-                            <?php if($sessionActive): ?>
-                                <a href="?accion=salir" class="btn btn-outline-light btn-sm rounded-pill px-3">
-                                    <i class="bi bi-box-arrow-right me-1"></i> Salir
+                            </li>
+                             <li class="nav-item">
+                                <a class="nav-link locked" href="#" data-bs-toggle="modal" data-bs-target="#loginModal" title="Requiere autenticación">
+                                    <i class="bi bi-lock-fill small"></i> Nosotros
                                 </a>
-                            <?php else: ?>
+                            </li>
+                            <li class="nav-item ms-lg-3">
                                 <button class="btn btn-outline-light btn-sm rounded-pill px-4 fw-bold" data-bs-toggle="modal" data-bs-target="#loginModal">
                                     Ingresar
                                 </button>
-                            <?php endif; ?>
-                        </li>
+                            </li>
+                        <?php endif; ?>
                     </ul>
                 </div>
             </div>
@@ -91,6 +86,18 @@ $sessionActive = isset($_SESSION['user']);
     <!-- CONTENIDO DINÁMICO -->
     <main id="content-article" class="flex-grow-1">
         <?php
+            // Display success/error messages
+            if (isset($_SESSION['success_message'])) {
+                echo '<div class="container mt-4"><div class="alert alert-success text-center" role="alert">' . $_SESSION['success_message'] . '</div></div>';
+                unset($_SESSION['success_message']);
+            } elseif (isset($_GET['msg']) && $_GET['msg'] == 'logout_success') {
+                echo '<div class="container mt-4"><div class="alert alert-success text-center" role="alert">¡Sesión cerrada exitosamente!</div></div>';
+            }
+            if (isset($_SESSION['error'])) {
+                 echo '<div class="container mt-4"><div class="alert alert-danger text-center" role="alert">' . $_SESSION['error'] . '</div></div>';
+                unset($_SESSION['error']);
+            }
+
             $mvc = new EnlacesPaginaController();
             $mvc->enlacesPaginaController();
         ?>
@@ -109,8 +116,8 @@ $sessionActive = isset($_SESSION['user']);
                 <div class="col-lg-3 offset-lg-1">
                     <h6 class="fw-bold mb-3 text-dark-custom">Enlaces</h6>
                     <ul class="list-unstyled small text-muted d-flex flex-column gap-2">
-                        <li><a href="?accion=inicio" class="text-decoration-none text-muted">Inicio</a></li>
-                        <li><a href="?accion=nosotros" class="text-decoration-none text-muted">Nosotros</a></li>
+                        <li><a href="index.php?action=inicio" class="text-decoration-none text-muted">Inicio</a></li>
+                        <li><a href="index.php?action=nosotros" class="text-decoration-none text-muted">Nosotros</a></li>
                     </ul>
                 </div>
                 <div class="col-lg-3">
