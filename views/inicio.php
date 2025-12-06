@@ -177,7 +177,7 @@
             
             <!-- Columna Contacto (Formulario) -->
             <div class="col-lg-7 p-5">
-                <h3 class="fw-bold text-indigo mb-2">Contáctanos</h3>
+                <h3 class="fw-bold text-indigo mb-2">Envia tu Pregunta</h3>
                 <p class="text-muted mb-4">¿Tienes dudas sobre el proceso de admisión? Escríbenos.</p>
                 <form>
                     <div class="row g-3">
