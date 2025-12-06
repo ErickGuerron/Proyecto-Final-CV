@@ -137,7 +137,7 @@ let developers = [
     fechaNacimiento: "15/02/2005",
     colorFavorito: "#fab82bff",
     hobbies: ["Baile", "K-pop", "Series de acción", "Cultura coreana y tailandesa", "Lectura"],
-    email: "belenzapatareyes@gmail.com"
+    email: "patylo1970maria@gmail.com"
   },
   {
     id: 8,
