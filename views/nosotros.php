@@ -90,10 +90,10 @@
                                 <?php endif; ?>
                                 
                                 <button class="btn btn-outline-secondary rounded-pill px-3" onclick="generarReporte()" title="Generar reporte PDF">
-                                    <i class="fas fa-file-pdf me-1"></i> Reporte
+                                    <i class="fas fa-file-pdf me-1"></i> Reporte Estudiante
                                 </button>
                                 <button class="btn btn-outline-primary rounded-pill px-3" onclick="generarReporteListado()" title="Reporte de estudiantes">
-                                    <i class="fas fa-users me-1"></i> Estudiantes
+                                    <i class="fas fa-users me-1"></i> Estudiantes/Cursos
                                 </button>
                                 <button class="btn btn-outline-info rounded-pill px-3" onclick="verEstadisticas()" title="Ver estadísticas">
                                     <i class="fas fa-chart-line me-1"></i> Stats
@@ -460,5 +460,105 @@
             }
         });
     </script>
+
+    <!-- Conexión con los nuevos reportes -->
+    <script>
+        (function () {
+            let reportModalInstance = null;
+
+            function getOrCreateReportModal() {
+                const modalEl = document.getElementById('reportViewerModal');
+                if (!modalEl) {
+                    console.error('No se encontró el modal de visor de reportes.');
+                    return null;
+                }
+                if (!reportModalInstance) {
+                    reportModalInstance = new bootstrap.Modal(modalEl);
+                }
+                return reportModalInstance;
+            }
+
+            // Abre el visor de reportes en el modal
+            window.openReportViewer = function (url, title) {
+                const frame = document.getElementById('reportViewerFrame');
+                const titleEl = document.getElementById('reportViewerTitle');
+                const modal = getOrCreateReportModal();
+
+                if (!frame || !modal) {
+                    console.error('No se pudo inicializar el visor de reportes.');
+                    return;
+                }
+
+                frame.src = url;
+                if (titleEl) {
+                    titleEl.textContent = title || 'Reporte';
+                }
+
+                modal.show();
+            };
+
+            // Reporte por estudiante
+            window.generarReporte = function () {
+                const searchInput = document.getElementById('searchInput');
+                const filtro = searchInput ? searchInput.value.trim() : '';
+                let idEst = filtro;
+
+                // Si no hay filtro, usar la fila seleccionada en la tabla
+                if (!idEst && window.selectedStudentId) {
+                    idEst = String(window.selectedStudentId).trim();
+                }
+
+                if (!idEst) {
+                    alert('Para generar este reporte debe seleccionar un estudiante en la tabla o escribir una cédula en el buscador.');
+                    return;
+                }
+
+                const url = '/views/report_estudiante.php?id_est=' + encodeURIComponent(idEst);
+                openReportViewer(url, 'Reporte académico del estudiante ' + idEst);
+            };
+
+            // Reporte general de estudiantes por curso
+            window.generarReporteListado = function () {
+                const url = '/views/report_estudiantes_cursos.php';
+                openReportViewer(url, 'Reporte de estudiantes por curso');
+            };
+
+            // Reporte de estadísticas de cursos
+            window.verEstadisticas = function () {
+                const url = '/views/report_grafico_cursos.php';
+                openReportViewer(url, 'Estadísticas de cursos');
+            };
+
+            // Manejo de selección de fila en la tabla para obtener ID_EST
+            document.addEventListener('DOMContentLoaded', function () {
+                const tbody = document.getElementById('tableBody');
+                if (!tbody) return;
+
+                tbody.addEventListener('click', function (e) {
+                    const row = e.target.closest('tr');
+                    if (!row || row.classList.contains('loading-state') || row.classList.contains('empty-state')) {
+                        return;
+                    }
+
+                    // Quitar selección previa
+                    tbody.querySelectorAll('tr.table-active').forEach(function (tr) {
+                        tr.classList.remove('table-active');
+                    });
+
+                    // Marcar fila activa
+                    row.classList.add('table-active');
+
+                    // Tomar la cédula de la primera celda
+                    const firstCell = row.querySelector('td');
+                    if (firstCell) {
+                        window.selectedStudentId = firstCell.textContent.trim();
+                        // Opcional: log para depuración
+                        console.log('Estudiante seleccionado:', window.selectedStudentId);
+                    }
+                });
+            });
+        })();
+    </script>
 </body>
 </html>
+

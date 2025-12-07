@@ -27,9 +27,11 @@
             z-index: 1050;
             backdrop-filter: blur(2px);
         }
+
         .report-modal-backdrop.show {
             display: flex;
         }
+
         .report-modal {
             background: #fff;
             width: 90vw;
@@ -44,6 +46,7 @@
             flex-direction: column;
             border: 1px solid rgba(0, 0, 0, 0.05);
         }
+
         .report-modal-header {
             display: flex;
             align-items: center;
@@ -52,12 +55,14 @@
             border-bottom: 1px solid #e2e8f0;
             background: linear-gradient(135deg, rgba(87, 92, 188, 0.05), rgba(101, 198, 142, 0.04));
         }
+
         .report-modal-title {
             margin: 0;
             font-size: 1.1rem;
             font-weight: 700;
             color: #575cbc;
         }
+
         .report-modal-close {
             border: none;
             background: transparent;
@@ -67,13 +72,16 @@
             cursor: pointer;
             padding: 6px;
         }
+
         .report-modal-close:hover {
             color: #2d3748;
         }
+
         .report-modal-body {
             flex: 1;
             background: #f7fafc;
         }
+
         .report-modal-body iframe {
             width: 100%;
             height: 100%;
@@ -84,14 +92,18 @@
 
 <body>
     <div class="container my-4">
-        <!-- Definimos el rol en una variable para facilitar las condiciones más abajo -->
-        <?php $rol = $_SESSION['user']['ROL_USU']; ?>
+        <?php
+        // session_start(); // Si ya inicias la sesión en otro lugar, no repitas esto aquí.
+        $rol = $_SESSION['user']['ROL_USU'] ?? null;
+        ?>
 
         <div class="card p-4 shadow-sm">
             <?php if ($rol === 'ADMIN' || $rol === 'SECRETARIO'): ?>
                 <h1 class="mb-3 text-primary">Gestión de Estudiantes</h1>
                 <p class="lead">
-                    <?php echo ($rol === 'SECRETARIO') ? 'Administración completa de registros.' : 'Visualización y generación de reportes.'; ?>
+                    <?php echo ($rol === 'SECRETARIO')
+                        ? 'Administración completa de registros.'
+                        : 'Visualización y generación de reportes.'; ?>
                 </p>
             <?php else: ?>
                 <h1 class="mb-3 text-primary">Página de Servicios</h1>
@@ -102,9 +114,18 @@
         <?php if ($rol === 'SECRETARIO' || $rol === 'ADMIN'): ?>
 
             <div style="margin-top: 20px;">
-                <table id="dg" title="Listado de Estudiantes" class="easyui-datagrid" style="width:100%;height:400px"
-                    url="models/obtener_estudiante.php" toolbar="#toolbar" pagination="true" rownumbers="true"
-                    fitColumns="true" singleSelect="true">
+                <table
+                    id="dg"
+                    title="Listado de Estudiantes"
+                    class="easyui-datagrid"
+                    style="width:100%;height:400px"
+                    url="/models/obtener_estudiante.php"
+                    toolbar="#toolbar"
+                    pagination="true"
+                    rownumbers="true"
+                    fitColumns="true"
+                    singleSelect="true"
+                >
                     <thead>
                         <tr>
                             <th field="ID_EST" width="50">Cedula</th>
@@ -123,26 +144,26 @@
                     <div style="display: flex; align-items: center;">
                         <?php if ($rol === 'SECRETARIO'): ?>
                             <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-add" plain="true"
-                                onclick="newUser()">Nuevo</a>
+                               onclick="newUser()">Nuevo</a>
                             <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true"
-                                onclick="editUser()">Editar</a>
+                               onclick="editUser()">Editar</a>
                             <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-remove" plain="true"
-                                onclick="destroyUser()">Eliminar</a>
+                               onclick="destroyUser()">Eliminar</a>
                             <!-- Separador visual -->
                             <span class="datagrid-btn-separator"
-                                style="vertical-align: middle; height: 15px; display:inline-block; margin: 0 10px;"></span>
+                                  style="vertical-align: middle; height: 15px; display:inline-block; margin: 0 10px;"></span>
                         <?php endif; ?>
 
-                        <!-- GRUPO 2: REPORTES (Visible para ADMIN y SECRETARIO porque "secretaria tiene todo") -->
+                        <!-- GRUPO 2: REPORTES -->
                         <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-print" plain="true"
-                            onclick="generarReporte()">Reporte General</a>
+                           onclick="generarReporte()">Reporte de Estudiante</a>
                         <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-tip" plain="true"
-                            onclick="generarReporteListado()">Reporte Estudiantes</a>
+                           onclick="generarReporteListado()">Reporte Estudiantes por Curso</a>
                         <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-large-picture" plain="true"
-                            onclick="verEstadisticas()">Estadísticas</a>
+                           onclick="verEstadisticas()">Estadísticas</a>
                     </div>
 
-                    <!-- GRUPO 3: BUSCADOR (Visible para ambos para poder filtrar la tabla/reportes) -->
+                    <!-- GRUPO 3: BUSCADOR -->
                     <div>
                         <span style="font-weight:bold;">Buscar Cédula:</span>
                         <input id="searchIdEst" class="easyui-textbox" style="width:150px" prompt="Escriba para filtrar...">
@@ -150,9 +171,9 @@
                 </div>
             </div>
 
-            <!-- Diálogo CRUD (Solo útil para SECRETARIO, pero el HTML puede estar presente oculto) -->
+            <!-- Diálogo CRUD -->
             <div id="dlg" class="easyui-dialog" style="width:520px"
-                data-options="closed:true,modal:true,border:'thin',buttons:'#dlg-buttons'">
+                 data-options="closed:true,modal:true,border:'thin',buttons:'#dlg-buttons'">
                 <form id="fm" method="post" novalidate style="margin:0;padding:20px 50px">
                     <h3>Informacion del Estudiante</h3>
                     <div style="margin-bottom:10px">
@@ -169,25 +190,25 @@
                     </div>
                     <div style="margin-bottom:10px">
                         <input name="COR_EST" class="easyui-textbox" required="true" validType="email" label="Email:"
-                            style="width:100%">
+                               style="width:100%">
                     </div>
                     <div style="margin-bottom:10px">
                         <input name="DIR_EST" class="easyui-textbox" required="true" label="Direccion:" style="width:100%">
                     </div>
                     <div style="margin-bottom:10px">
                         <input name="FEC_NAC" class="easyui-textbox" required="true" type="date" label="FechaNac:"
-                            style="width:100%">
+                               style="width:100%">
                     </div>
                 </form>
             </div>
             <div id="dlg-buttons">
                 <a href="javascript:void(0)" class="easyui-linkbutton c6" iconCls="icon-ok" onclick="saveUser()"
-                    style="width:90px">Guardar</a>
+                   style="width:90px">Guardar</a>
                 <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel"
-                    onclick="javascript:$('#dlg').dialog('close')" style="width:90px">Cancelar</a>
+                   onclick="javascript:$('#dlg').dialog('close')" style="width:90px">Cancelar</a>
             </div>
 
-            <!-- Modal sencillo para previsualizar reportes (custom, sin EasyUI) -->
+            <!-- Modal sencillo para previsualizar reportes -->
             <div id="reportModal" class="report-modal-backdrop" aria-hidden="true">
                 <div class="report-modal" role="dialog" aria-labelledby="reportModalTitle">
                     <div class="report-modal-header">
@@ -205,11 +226,10 @@
                 var searchTimer;
 
                 $(function () {
-                    $('#searchIdEst').textbox('textbox').on('keyup', function (e) {
+                    $('#searchIdEst').textbox('textbox').on('keyup', function () {
                         clearTimeout(searchTimer);
 
                         var valor = this.value.trim();
-
 
                         searchTimer = setTimeout(function () {
                             doSearch(valor);
@@ -228,10 +248,10 @@
                         : $input.val().trim();
 
                     if (searchValue === "") {
-                        $('#dg').datagrid('options').url = 'models/obtener_estudiante.php';
+                        $('#dg').datagrid('options').url = '/models/obtener_estudiante.php';
                     } else {
                         $('#dg').datagrid('options').url =
-                            'models/obtener_estudiante_id.php?ID_EST=' + encodeURIComponent(searchValue);
+                            '/models/obtener_estudiante_id.php?ID_EST=' + encodeURIComponent(searchValue);
                     }
 
                     $('#dg').datagrid('reload');
@@ -243,8 +263,7 @@
                     }
                 }
 
-
-                // --- FUNCIONES DE REPORTE (modal custom sin EasyUI) ---
+                // --- FUNCIONES DE REPORTE ---
                 function setupReportModal() {
                     var backdrop = document.getElementById('reportModal');
                     var closeBtn = document.getElementById('reportModalClose');
@@ -279,6 +298,7 @@
                         titleEl.textContent = title || 'Reporte';
                     }
 
+                    console.log('Abriendo reporte:', url);
                     frame.src = url;
                     backdrop.classList.add('show');
                     backdrop.setAttribute('aria-hidden', 'false');
@@ -298,41 +318,68 @@
                     }
                 }
 
+                /**
+                 * Reporte de Estudiante:
+                 * - Si hay cédula en el buscador -> report_estudiante.php?id_est=...
+                 * - Si no hay cédula pero hay fila seleccionada -> report_estudiante.php?id_est=ID_EST de la fila.
+                 * - Si no hay nada -> muestra mensaje informativo y NO abre reporte.
+                 */
                 function generarReporte() {
                     var filtro = $('#searchIdEst').textbox('getValue').trim();
-                    var hasFiltro = filtro !== '';
+                    var row = $('#dg').datagrid('getSelected');
 
-                    var urlReporte = hasFiltro
-                        ? 'views/report_estudiante.php?id=' + encodeURIComponent(filtro)
-                        : 'views/report_estudiantes_registros.php';
+                    var urlReporte;
+                    var titulo;
 
-                    var titulo = hasFiltro ? 'Reporte de estudiante' : 'Reporte general';
+                    if (filtro !== '') {
+                        urlReporte = '/views/report_estudiante.php?id_est=' + encodeURIComponent(filtro);
+                        titulo = 'Reporte académico del estudiante ' + filtro;
+                    } else if (row) {
+                        urlReporte = '/views/report_estudiante.php?id_est=' + encodeURIComponent(row.ID_EST);
+                        titulo = 'Reporte académico del estudiante ' + row.ID_EST;
+                    } else {
+                        $.messager.alert(
+                            'Aviso',
+                            'Para generar este reporte debe seleccionar un estudiante en la tabla o escribir una cédula en el buscador.',
+                            'info'
+                        );
+                        return;
+                    }
 
                     openReportModal(urlReporte, titulo);
                 }
 
+                /**
+                 * Reporte de estudiantes por curso (listado).
+                 * Siempre abre report_estudiantes_cursos.php.
+                 */
                 function generarReporteListado() {
-                    openReportModal('views/report_estudiantes.php', 'Reporte de estudiantes');
+                    openReportModal('/views/report_estudiantes_cursos.php', 'Reporte de estudiantes por curso');
                 }
 
+                /**
+                 * Reporte de estadísticas (gráficos).
+                 */
                 function verEstadisticas() {
-                    openReportModal('views/report_grafico_cursos.php', 'Estadísticas de cursos');
+                    openReportModal('/views/report_grafico_cursos.php', 'Estadísticas de cursos');
                 }
 
-                // --- FUNCIONES CRUD (Solo funcionarán si el usuario tiene permisos en el backend también) ---
+                // --- FUNCIONES CRUD ---
                 function newUser() {
                     $('#dlg').dialog('open').dialog('center').dialog('setTitle', 'Nuevo Estudiante');
                     $('#fm').form('clear');
-                    url = 'models/agregar_estudiante.php';
+                    url = '/models/agregar_estudiante.php';
                 }
+
                 function editUser() {
                     var row = $('#dg').datagrid('getSelected');
                     if (row) {
                         $('#dlg').dialog('open').dialog('center').dialog('setTitle', 'Editar Estudiante');
                         $('#fm').form('load', row);
-                        url = 'models/actualizar_estudiante.php?ID_EST=' + row.ID_EST;
+                        url = '/models/actualizar_estudiante.php?ID_EST=' + encodeURIComponent(row.ID_EST);
                     }
                 }
+
                 function saveUser() {
                     $('#fm').form('submit', {
                         url: url,
@@ -341,11 +388,11 @@
                             return $(this).form('validate');
                         },
                         success: function (result) {
-                            var result = eval('(' + result + ')');
-                            if (result.errorMsg) {
+                            var resultObj = eval('(' + result + ')');
+                            if (resultObj.errorMsg) {
                                 $.messager.show({
                                     title: 'Error',
-                                    msg: result.errorMsg
+                                    msg: resultObj.errorMsg
                                 });
                             } else {
                                 $('#dlg').dialog('close');
@@ -354,12 +401,13 @@
                         }
                     });
                 }
+
                 function destroyUser() {
                     var row = $('#dg').datagrid('getSelected');
                     if (row) {
                         $.messager.confirm('Confirmar', '¿Está seguro de eliminar este usuario?', function (r) {
                             if (r) {
-                                $.post('models/eliminar_estudiante.php', { ID_EST: row.ID_EST }, function (result) {
+                                $.post('/models/eliminar_estudiante.php', { ID_EST: row.ID_EST }, function (result) {
                                     if (result.success) {
                                         $('#dg').datagrid('reload');
                                     } else {
