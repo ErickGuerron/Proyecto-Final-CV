@@ -509,26 +509,35 @@
 }
 
 /* =========================================
-   BOTONES DE NAVEGACIÓN (TABS/PILLS)
+   BOTONES DE NAVEGACIÓN (TABS/PILLS) - FIX VISIBILIDAD
    ========================================= */
+.nav-pills {
+    background: transparent;
+    padding: 5px;
+}
+
 .nav-pills .nav-link {
-    background-color: #fff;
-    color: var(--color-text-muted);
-    border: 1px solid rgba(87, 92, 188, 0.2);
+    /* Fondo gris claro por defecto para que se vea el "botón" */
+    background-color: #e9ecef !important; 
+    /* Texto oscuro forzado */
+    color: #495057 !important;
+    border: 1px solid #dee2e6;
     margin-right: 10px;
+    font-weight: 700;
     transition: all 0.3s ease;
 }
 
 .nav-pills .nav-link:hover {
-    border-color: var(--color-primary-indigo);
-    color: var(--color-primary-indigo);
+    background-color: #dee2e6 !important;
+    color: #575cbc !important; /* Color Indigo al pasar el mouse */
     transform: translateY(-2px);
 }
 
 .nav-pills .nav-link.active {
-    background: linear-gradient(135deg, var(--color-primary-indigo), var(--color-indigo-hover)) !important;
-    color: white !important;
-    border: none;
+    /* Gradiente Indigo cuando está activo */
+    background: linear-gradient(135deg, #575cbc, #4b4ea5) !important;
+    color: #ffffff !important;
+    border-color: transparent;
     box-shadow: 0 4px 12px rgba(87, 92, 188, 0.3);
 }
 

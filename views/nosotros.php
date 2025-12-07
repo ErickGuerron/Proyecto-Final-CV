@@ -99,9 +99,11 @@
                                     </button>
                                 <?php endif; ?>
                                 
-                                <button class="btn btn-outline-secondary rounded-pill px-3" onclick="generarReporte()" title="Reporte PDF">
-                                    <i class="fas fa-file-pdf me-1"></i> Reporte
-                                </button>
+                                <?php if ($rol === 'ADMIN'): ?>
+                                    <button class="btn btn-outline-secondary rounded-pill px-3" onclick="generarReporte()" title="Reporte PDF">
+                                        <i class="fas fa-file-pdf me-1"></i> Reporte
+                                    </button>
+                                <?php endif; ?>
                                 <button class="btn btn-outline-info rounded-pill px-3" onclick="verEstadisticas()" title="Ver estadísticas">
                                     <i class="fas fa-chart-line me-1"></i> Stats
                                 </button>
@@ -441,8 +443,16 @@ document.getElementById('confirmDeleteBtn').addEventListener('click', function()
             const btn = document.getElementById('btnNew');
             if(btn) btn.innerHTML = `<i class="fas fa-plus-circle me-2"></i>${config.btnText}`;
             
-            document.querySelectorAll('.nav-link').forEach(btn => btn.classList.remove('active'));
-            event.target.closest('.nav-link')?.classList.add('active');
+            document.querySelectorAll('.nav-link').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.textContent.includes('Estudiantes') && name === 'students') {
+                    btn.classList.add('active');
+                } else if (btn.textContent.includes('Cursos') && name === 'courses') {
+                    btn.classList.add('active');
+                } else if (btn.textContent.includes('Inscripciones') && name === 'enrollments') {
+                    btn.classList.add('active');
+                }
+            });
 
             fetchData();
         }
