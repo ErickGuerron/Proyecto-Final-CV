@@ -213,12 +213,31 @@
                     wrapperDiv.appendChild(invalidFeedback);
 
                 } else {
-                    wrapperDiv.classList.add('form-floating');
-                    wrapperDiv.innerHTML = `
-                        <input type="${field.type}" class="form-control" id="${field.id}" name="${field.id}" placeholder="${field.label}" ${field.required ? 'required' : ''} ${field.pattern ? `pattern="${field.pattern}"` : ''}>
-                        <label for="${field.id}"><i class="fas ${getIconForField(field.id)} me-2"></i>${field.label}</label>
-                        <div class="invalid-feedback">Campo inválido.</div>
-                    `;
+                    const floatingDiv = document.createElement('div');
+                    floatingDiv.className = 'form-floating';
+
+                    const input = document.createElement('input');
+                    input.type = field.type;
+                    input.className = 'form-control';
+                    input.id = field.id;
+                    input.name = field.id;
+                    input.placeholder = field.label;
+                    if (field.required) input.required = true;
+                    if (field.pattern) input.pattern = field.pattern;
+                    if (field.defaultValue) input.value = field.defaultValue; // Establecer valor por defecto
+
+                    const label = document.createElement('label');
+                    label.htmlFor = field.id;
+                    label.innerHTML = `<i class="fas ${getIconForField(field.id)} me-2"></i>${field.label}`;
+
+                    const invalidFeedback = document.createElement('div');
+                    invalidFeedback.className = 'invalid-feedback';
+                    invalidFeedback.textContent = `Por favor, ingrese un valor válido para ${field.label}.`;
+
+                    floatingDiv.appendChild(input);
+                    floatingDiv.appendChild(label);
+                    wrapperDiv.appendChild(floatingDiv);
+                    wrapperDiv.appendChild(invalidFeedback);
                 }
                 form.appendChild(wrapperDiv);
             });

@@ -5,6 +5,26 @@ $conn = Database::getInstance()->getConnection();
 header('Content-Type: application/json; charset=utf-8');
 
 try {
+    // Obtener el nombre del curso del POST
+    $nom_cur = $_POST["NOM_CUR"];
+    $des_cur = $_POST["DES_CUR"];
+
+    // Validar si el curso ya existe por NOM_CUR (insensible a mayúsculas/minúsculas)
+    $sqlCheck = "SELECT COUNT(*) FROM CURSOS WHERE LOWER(NOM_CUR) = LOWER(:nom_cur)";
+    $stmtCheck = $conn->prepare($sqlCheck);
+    $stmtCheck->bindParam(':nom_cur', $nom_cur);
+    $stmtCheck->execute();
+    $count = $stmtCheck->fetchColumn();
+
+    if ($count > 0) {
+        http_response_code(409); // Conflict
+        echo json_encode([
+            "success" => false,
+            "errorMsg" => "Error: Ya existe un curso con el nombre '" . $nom_cur . "'."
+        ]);
+        exit();
+    }
+
     // 1. Obtener el máximo ID_CUR
     $stmtMax = $conn->query("SELECT MAX(ID_CUR) as max_id FROM CURSOS");
     $max_id_row = $stmtMax->fetch(PDO::FETCH_ASSOC);
@@ -20,10 +40,6 @@ try {
 
     // 4. Formatear el nuevo ID, ej: "CUR-000004"
     $new_id_cur = 'CUR-' . str_pad($new_id_num, 6, '0', STR_PAD_LEFT);
-
-    // Obtener los otros campos del POST
-    $nom_cur = $_POST["NOM_CUR"];
-    $des_cur = $_POST["DES_CUR"];
 
     // 5. Insertar con el nuevo ID
     $sqlInsert = "

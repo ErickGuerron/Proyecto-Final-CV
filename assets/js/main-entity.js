@@ -297,20 +297,30 @@ function openModalForNew() {
     form.reset();
     form.classList.remove('was-validated');
     
-    const pkField = document.getElementById(entityConfig.primaryKey);
-    if (pkField) {
-        pkField.readOnly = false;
-        // Ocultar campo PK si es autoincremental
-        if (entityConfig.autoIncrement) {
-            pkField.closest('.form-floating').style.display = 'none';
+    // Iterar sobre todos los campos del modal para aplicar lógicas de visibilidad y 'required'
+    entityConfig.modalFields.forEach(field => {
+        const input = document.getElementById(field.id);
+        if (input) {
+            // Asegurarse de que el campo sea editable y requerido por defecto
+            input.readOnly = false;
+            input.required = field.required || false; // Restaurar required si se quitó
+
+            // Ocultar si es el PK autoincremental o si tiene hideOnCreate: true
+            if (
+                (field.id === entityConfig.primaryKey && entityConfig.autoIncrement) ||
+                field.hideOnCreate
+            ) {
+                input.closest('.form-floating').style.display = 'none';
+                input.required = false; // Remover 'required' si está oculto
+            } else {
+                input.closest('.form-floating').style.display = 'block'; // Asegurarse de que esté visible
+            }
         }
-    }
+    });
 
     // El título se personaliza en cada vista (ej. cursos.php) si es necesario
     const titleEl = document.getElementById('modalTitle');
-    if (titleEl.innerHTML.includes('fa-plus-circle')) {
-        // El título ya fue personalizado, no hacer nada
-    } else {
+    if (!titleEl.innerHTML.includes('fa-plus-circle')) { // Solo si no está ya personalizado
         titleEl.innerText = `➕ Nuevo ${entityConfig.entityName}`;
     }
     
@@ -323,38 +333,40 @@ function editEntity(item) {
     const form = document.getElementById('entityForm');
     form.classList.remove('was-validated');
     
-    const pkField = document.getElementById(entityConfig.primaryKey);
-
-    // Asegurarse de que el campo PK sea visible y requerido al editar
-    if (entityConfig.autoIncrement && pkField) {
-        pkField.closest('.form-floating').style.display = 'block';
-        pkField.required = true;
-    }
-
+    // Iterar sobre todos los campos del modal para aplicar lógicas de visibilidad y 'required'
     entityConfig.modalFields.forEach(field => {
         const input = document.getElementById(field.id);
-        delete input.dataset.selectedId;
+        if (input) {
+            // Asegurarse de que el campo sea visible
+            input.closest('.form-floating').style.display = 'block';
+            // Restaurar el estado 'required' original
+            input.required = field.required || false;
 
-        if (field.type === 'searchable-foreign-key') {
-            const idValue = item[field.id];
-            input.dataset.selectedId = idValue;
-            
-            let displayText = idValue;
-            if (field.id === 'ID_EST_INS' && item.NOM_EST) {
-                displayText = `${item.NOM_EST} ${item.APE_EST}`;
-            } else if (field.id === 'ID_CUR_INS' && item.NOM_CUR) {
-                displayText = item.NOM_CUR;
+            // Lógica específica para el campo de clave primaria si es autoincremental
+            if (field.id === entityConfig.primaryKey) {
+                input.readOnly = true; // Siempre de solo lectura al editar el PK
+            } else {
+                input.readOnly = false; // Otros campos son editables
             }
-            input.value = displayText;
-        } else {
-            input.value = item[field.id];
+
+            // Llenar el valor del campo
+            delete input.dataset.selectedId; // Limpiar datos previos
+            if (field.type === 'searchable-foreign-key') {
+                const idValue = item[field.id];
+                input.dataset.selectedId = idValue;
+                
+                let displayText = idValue;
+                if (field.id === 'ID_EST_INS' && item.NOM_EST) {
+                    displayText = `${item.NOM_EST} ${item.APE_EST}`;
+                } else if (field.id === 'ID_CUR_INS' && item.NOM_CUR) {
+                    displayText = item.NOM_CUR;
+                }
+                input.value = displayText;
+            } else {
+                input.value = item[field.id];
+            }
         }
     });
-
-    if (pkField) {
-        pkField.readOnly = true;
-        pkField.required = true; // Re-asegurar que es requerido
-    }
 
     document.getElementById('modalTitle').innerText = `✏️ Editar ${entityConfig.entityName}`;
     currentUrl = `${entityConfig.urls.update}?${entityConfig.primaryKey}=${encodeURIComponent(item[entityConfig.primaryKey])}`;
@@ -375,9 +387,16 @@ function saveEntity() {
 
     const formData = new FormData(form);
     
-    // No enviar PK para entidades nuevas con autoincremento
-    if (currentUrl === entityConfig.urls.add && entityConfig.autoIncrement) {
-        formData.delete(entityConfig.primaryKey);
+    // Si es una nueva entidad, no enviar PK si es autoincremento, ni campos hideOnCreate
+    if (currentUrl === entityConfig.urls.add) {
+        if (entityConfig.autoIncrement) {
+            formData.delete(entityConfig.primaryKey);
+        }
+        entityConfig.modalFields.forEach(field => {
+            if (field.hideOnCreate) {
+                formData.delete(field.id);
+            }
+        });
     }
     
     // Asegurarse de que los IDs se envíen para los campos de FK

@@ -25,6 +25,24 @@ try {
         exit;
     }
 
+    // Validar si la combinación estudiante-curso ya existe en OTRA inscripción
+    $sqlCheck = "SELECT COUNT(*) FROM INSCRIPCIONES WHERE ID_EST_INS = :id_est_ins AND ID_CUR_INS = :id_cur_ins AND ID_INS != :id_ins";
+    $stmtCheck = $conn->prepare($sqlCheck);
+    $stmtCheck->bindParam(':id_est_ins', $id_est_ins);
+    $stmtCheck->bindParam(':id_cur_ins', $id_cur_ins);
+    $stmtCheck->bindParam(':id_ins', $id_ins);
+    $stmtCheck->execute();
+    $count = $stmtCheck->fetchColumn();
+
+    if ($count > 0) {
+        http_response_code(409); // Conflict
+        echo json_encode([
+            "ok"      => false,
+            "mensaje" => "Error: Ya existe otra inscripción con este estudiante en este curso."
+        ]);
+        exit;
+    }
+
     $sqlUpdate = "
         UPDATE INSCRIPCIONES
         SET
@@ -41,9 +59,12 @@ try {
     ]);
 
     if ($stmt->rowCount() === 0) {
+        // Podría ser que no hubo cambios o que el ID_INS no existe.
+        // Si no hubo cambios, no es un error, pero el mensaje debe reflejarlo.
+        // Si el ID_INS no existe, el frontend debería manejarlo.
         echo json_encode([
-            "ok"      => false,
-            "mensaje" => "No se actualizó ningún registro. Verifique el ID de la inscripción o si los datos son iguales a los actuales."
+            "ok"      => true, // Consideramos que está "ok" si no hubo cambios, no es un error
+            "mensaje" => "La inscripción se actualizó correctamente (o no hubo cambios)."
         ]);
         exit;
     }
