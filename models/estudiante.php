@@ -12,7 +12,7 @@ class Estudiante {
             ':cor' => $datos['COR_EST'],
             ':dir' => $datos['DIR_EST'],
             ':fec_nac' => $datos['FEC_NAC'],
-            ':fec_cre' => date('Y-m-d H:i:s') // Assuming FEC_CRE is creation date
+            ':fec_cre' => date('Y-m-d H:i:s') 
         ]);
         return $db->lastInsertId();
     }
