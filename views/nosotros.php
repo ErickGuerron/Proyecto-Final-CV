@@ -99,11 +99,12 @@
                                     </button>
                                 <?php endif; ?>
                                 
-                                <?php if ($rol === 'ADMIN'): ?>
-                                    <button class="btn btn-outline-secondary rounded-pill px-3" onclick="generarReporte()" title="Reporte PDF">
-                                        <i class="fas fa-file-pdf me-1"></i> Reporte
-                                    </button>
-                                <?php endif; ?>
+                                <button class="btn btn-outline-secondary rounded-pill px-3" onclick="generarReporte()" title="Generar reporte PDF">
+                                    <i class="fas fa-file-pdf me-1"></i> Reporte Estudiante
+                                </button>
+                                <button class="btn btn-outline-primary rounded-pill px-3" onclick="generarReporteListado()" title="Reporte de estudiantes">
+                                    <i class="fas fa-users me-1"></i> Estudiantes/Cursos
+                                </button>
                                 <button class="btn btn-outline-info rounded-pill px-3" onclick="verEstadisticas()" title="Ver estadísticas">
                                     <i class="fas fa-chart-line me-1"></i> Stats
                                 </button>
@@ -176,10 +177,19 @@
     <!-- 1. MODAL ESTUDIANTE -->
     <div class="modal fade" id="studentModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
-                <div class="modal-header border-0 bg-light p-4">
-                    <h5 class="modal-title fw-bold text-primary"><i class="fas fa-user-graduate me-2"></i>Datos Estudiante</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 20px; overflow: hidden;">
+                
+                <!-- Header del Modal con Gradiente -->
+                <div class="modal-header border-0" style="background: linear-gradient(135deg, rgba(87, 92, 188, 0.08), rgba(101, 198, 142, 0.05)); padding: 1.5rem;">
+                    <div class="d-flex align-items-center">
+                        <div class="icon-box-indigo me-3" style="width: 50px; height: 50px; font-size: 1.3rem;">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <h5 class="modal-title fw-bold mb-0" id="modalTitle" style="color: var(--color-primary-indigo); font-size: 1.4rem;">
+                            Estudiante
+                        </h5>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                 </div>
                 <div class="modal-body p-4">
                     <form id="studentForm">
@@ -304,6 +314,21 @@
                         <button type="button" class="btn btn-light rounded-pill px-3" data-bs-dismiss="modal">Cancelar</button>
                         <button type="button" class="btn btn-danger rounded-pill px-3" id="confirmDeleteBtn">Sí, Eliminar</button>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal visor de reportes -->
+    <div class="modal fade" id="reportViewerModal" tabindex="-1" aria-labelledby="reportViewerTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-xl" style="width:90vw;max-width:1100px">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title fw-bold" id="reportViewerTitle">Reporte</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body p-0" style="height:80vh;max-height:850px;min-height:480px; background:#f6f7fb;">
+                    <iframe id="reportViewerFrame" src="" title="Visor de reportes" style="width:100%; height:100%; border:0;"></iframe>
                 </div>
             </div>
         </div>
@@ -624,5 +649,105 @@
             if(el) el.textContent = time;
         }
     </script>
+
+    <!-- Conexión con los nuevos reportes -->
+    <script>
+        (function () {
+            let reportModalInstance = null;
+
+            function getOrCreateReportModal() {
+                const modalEl = document.getElementById('reportViewerModal');
+                if (!modalEl) {
+                    console.error('No se encontró el modal de visor de reportes.');
+                    return null;
+                }
+                if (!reportModalInstance) {
+                    reportModalInstance = new bootstrap.Modal(modalEl);
+                }
+                return reportModalInstance;
+            }
+
+            // Abre el visor de reportes en el modal
+            window.openReportViewer = function (url, title) {
+                const frame = document.getElementById('reportViewerFrame');
+                const titleEl = document.getElementById('reportViewerTitle');
+                const modal = getOrCreateReportModal();
+
+                if (!frame || !modal) {
+                    console.error('No se pudo inicializar el visor de reportes.');
+                    return;
+                }
+
+                frame.src = url;
+                if (titleEl) {
+                    titleEl.textContent = title || 'Reporte';
+                }
+
+                modal.show();
+            };
+
+            // Reporte por estudiante
+            window.generarReporte = function () {
+                const searchInput = document.getElementById('searchInput');
+                const filtro = searchInput ? searchInput.value.trim() : '';
+                let idEst = filtro;
+
+                // Si no hay filtro, usar la fila seleccionada en la tabla
+                if (!idEst && window.selectedStudentId) {
+                    idEst = String(window.selectedStudentId).trim();
+                }
+
+                if (!idEst) {
+                    alert('Para generar este reporte debe seleccionar un estudiante en la tabla o escribir una cédula en el buscador.');
+                    return;
+                }
+
+                const url = '/views/report_estudiante.php?id_est=' + encodeURIComponent(idEst);
+                openReportViewer(url, 'Reporte académico del estudiante ' + idEst);
+            };
+
+            // Reporte general de estudiantes por curso
+            window.generarReporteListado = function () {
+                const url = '/views/report_estudiantes_cursos.php';
+                openReportViewer(url, 'Reporte de estudiantes por curso');
+            };
+
+            // Reporte de estadísticas de cursos
+            window.verEstadisticas = function () {
+                const url = '/views/report_grafico_cursos.php';
+                openReportViewer(url, 'Estadísticas de cursos');
+            };
+
+            // Manejo de selección de fila en la tabla para obtener ID_EST
+            document.addEventListener('DOMContentLoaded', function () {
+                const tbody = document.getElementById('tableBody');
+                if (!tbody) return;
+
+                tbody.addEventListener('click', function (e) {
+                    const row = e.target.closest('tr');
+                    if (!row || row.classList.contains('loading-state') || row.classList.contains('empty-state')) {
+                        return;
+                    }
+
+                    // Quitar selección previa
+                    tbody.querySelectorAll('tr.table-active').forEach(function (tr) {
+                        tr.classList.remove('table-active');
+                    });
+
+                    // Marcar fila activa
+                    row.classList.add('table-active');
+
+                    // Tomar la cédula de la primera celda
+                    const firstCell = row.querySelector('td');
+                    if (firstCell) {
+                        window.selectedStudentId = firstCell.textContent.trim();
+                        // Opcional: log para depuración
+                        console.log('Estudiante seleccionado:', window.selectedStudentId);
+                    }
+                });
+            });
+        })();
+    </script>
 </body>
 </html>
+

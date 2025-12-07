@@ -6,6 +6,7 @@ let searchTimer;
 let modalInstance;
 let currentSearchTerm = '';
 let isLoading = false;
+let reportModalInstance;
 
 // Rol del usuario (viene desde PHP via window.appConfig)
 const userRole = window.appConfig?.role || 'GUEST';
@@ -42,9 +43,24 @@ function initializeModal() {
             document.getElementById('ID_EST').readOnly = false;
         });
         
-        console.log('✅ Modal inicializado correctamente');
+        console.log('???. Modal inicializado correctamente');
     } else {
-        console.warn('⚠️ No se encontró el elemento modal');
+        console.warn('?????? No se encontr? el elemento modal');
+    }
+
+    const reportModalEl = document.getElementById('reportViewerModal');
+    if (reportModalEl) {
+        reportModalInstance = new bootstrap.Modal(reportModalEl, {
+            backdrop: 'static',
+            keyboard: true
+        });
+
+        reportModalEl.addEventListener('hidden.bs.modal', () => {
+            const iframe = document.getElementById('reportViewerFrame');
+            if (iframe) {
+                iframe.src = '';
+            }
+        });
     }
 }
 
@@ -662,24 +678,52 @@ function showNotification(message, type = 'info') {
 }
 
 // =========================================
-// FUNCIONES EXTRA (REPORTES Y ESTADÍSTICAS)
+// FUNCIONES EXTRA (REPORTES Y ESTAD??STICAS)
 // =========================================
+function openReportModal(url, title) {
+    const modalEl = document.getElementById('reportViewerModal');
+    const iframe = document.getElementById('reportViewerFrame');
+    const titleEl = document.getElementById('reportViewerTitle');
+
+    if (!modalEl || !iframe) {
+        showNotification('No se pudo abrir el visor de reportes', 'error');
+        return;
+    }
+
+    if (titleEl) {
+        titleEl.textContent = title || 'Reporte';
+    }
+
+    iframe.src = url;
+
+    if (reportModalInstance) {
+        reportModalInstance.show();
+    } else {
+        // Fallback en caso de que no se haya inicializado
+        const tempModal = new bootstrap.Modal(modalEl, { backdrop: 'static', keyboard: true });
+        tempModal.show();
+    }
+}
+
 function generarReporte() {
-    showNotification('📄 Generando reporte PDF...', 'info');
-    console.log('📄 Generando reporte...');
-    
-    setTimeout(() => {
-        showNotification('Funcionalidad en desarrollo', 'warning');
-    }, 1000);
+    const filtro = (currentSearchTerm || '').trim();
+    const hasFiltro = filtro !== '';
+
+    const urlReporte = hasFiltro
+        ? 'views/report_estudiante.php?id=' + encodeURIComponent(filtro)
+        : 'views/report_estudiantes_registros.php';
+
+    const titulo = hasFiltro ? 'Reporte de estudiante' : 'Reporte general';
+
+    openReportModal(urlReporte, titulo);
+}
+
+function generarReporteListado() {
+    openReportModal('views/report_estudiantes.php', 'Reporte de estudiantes');
 }
 
 function verEstadisticas() {
-    showNotification('📊 Abriendo panel de estadísticas...', 'info');
-    console.log('📊 Abriendo estadísticas...');
-    
-    setTimeout(() => {
-        showNotification('Funcionalidad en desarrollo', 'warning');
-    }, 1000);
+    openReportModal('views/report_grafico_cursos.php', 'Estadísticas de cursos');
 }
 
 // =========================================
