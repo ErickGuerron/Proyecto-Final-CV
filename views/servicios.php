@@ -1,233 +1,195 @@
+<?php 
+    if(!isset($_SESSION)) { session_start(); }
+    $rol = $_SESSION['user']['ROL_USU'] ?? 'GUEST'; 
+?>
 <!DOCTYPE html>
-<html>
-
+<html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Gestión Académica - Estudiantes</title>
-    <!-- Usamos CDNs para asegurar que las librerías carguen correctamente -->
-    <link rel="stylesheet" type="text/css" href="../assets/jquery/themes/default/easyui.css">
-    <link rel="stylesheet" type="text/css" href="../assets/jquery/themes/icon.css">
-    <link rel="stylesheet" type="text/css" href="../assets/jquery/themes/color.css">
-
-    <!-- Cargamos jQuery primero -->
-    <script type="text/javascript" src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <!-- Luego cargamos EasyUI -->
-    <script type="text/javascript" src="../assets/jquery/jquery.easyui.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Estudiantes - Tech Indigo</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Hoja de Estilos Principal -->
+    <link href="assets/css/main.css" rel="stylesheet">
 </head>
 
 <body>
-    <div class="container my-4">
-        <!-- Definimos el rol en una variable para facilitar las condiciones más abajo -->
-        <?php $rol = $_SESSION['user']['ROL_USU']; ?>
-
-        <div class="card p-4 shadow-sm">
-            <?php if ($rol === 'ADMIN' || $rol === 'SECRETARIO'): ?>
-                <h1 class="mb-3 text-primary">Gestión de Estudiantes</h1>
-                <p class="lead">
-                    <?php echo ($rol === 'SECRETARIO') ? 'Administración completa de registros.' : 'Visualización y generación de reportes.'; ?>
-                </p>
-            <?php else: ?>
-                <h1 class="mb-3 text-primary">Página de Servicios</h1>
-                <p class="lead">Explora la amplia gama de servicios académicos que ofrecemos en Tech Indigo Académico.</p>
-            <?php endif; ?>
+    <div class="container my-5">
+        
+        <!-- Encabezado -->
+        <div class="card card-custom p-4 mb-4">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <h2 class="mb-1">Gestión de Estudiantes</h2>
+                    <p class="text-muted mb-0">
+                        <?php echo ($rol === 'SECRETARIO') ? 'Administración completa de registros.' : 'Visualización y generación de reportes.'; ?>
+                    </p>
+                </div>
+            </div>
         </div>
 
         <?php if ($rol === 'SECRETARIO' || $rol === 'ADMIN'): ?>
-
-            <div style="margin-top: 20px;">
-                <table id="dg" title="Listado de Estudiantes" class="easyui-datagrid" style="width:100%;height:400px"
-                    url="models/obtener_estudiante.php" toolbar="#toolbar" pagination="true" rownumbers="true"
-                    fitColumns="true" singleSelect="true">
-                    <thead>
-                        <tr>
-                            <th field="ID_EST" width="50">Cedula</th>
-                            <th field="NOM_EST" width="50">Nombre</th>
-                            <th field="APE_EST" width="50">Apellido</th>
-                            <th field="TEL_EST" width="50">Telefono</th>
-                            <th field="COR_EST" width="50">Correo</th>
-                            <th field="DIR_EST" width="50">Direccion</th>
-                            <th field="FEC_NAC" width="80">Fecha de Nacimiento</th>
-                        </tr>
-                    </thead>
-                </table>
-
-                <div id="toolbar" style="padding:5px; display:flex; justify-content:space-between; align-items:center;">
-
-                    <div style="display: flex; align-items: center;">
-                        <?php if ($rol === 'SECRETARIO'): ?>
-                            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-add" plain="true"
-                                onclick="newUser()">Nuevo</a>
-                            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true"
-                                onclick="editUser()">Editar</a>
-                            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-remove" plain="true"
-                                onclick="destroyUser()">Eliminar</a>
-                            <!-- Separador visual -->
-                            <span class="datagrid-btn-separator"
-                                style="vertical-align: middle; height: 15px; display:inline-block; margin: 0 10px;"></span>
-                        <?php endif; ?>
-
-                        <!-- GRUPO 2: REPORTES (Visible para ADMIN y SECRETARIO porque "secretaria tiene todo") -->
-                        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-print" plain="true"
-                            onclick="generarReporte()">Reporte General</a>
-                        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-large-picture" plain="true"
-                            onclick="verEstadisticas()">Estadísticas</a>
-                    </div>
-
-                    <!-- GRUPO 3: BUSCADOR (Visible para ambos para poder filtrar la tabla/reportes) -->
-                    <div>
-                        <span style="font-weight:bold;">Buscar Cédula:</span>
-                        <input id="searchIdEst" class="easyui-textbox" style="width:150px" prompt="Escriba para filtrar...">
+            
+            <!-- Barra de Herramientas -->
+            <div class="card card-custom mb-4">
+                <div class="card-body toolbar-section">
+                    <div class="row align-items-center g-3">
+                        <div class="col-md-7 col-lg-6">
+                            <?php if ($rol === 'SECRETARIO'): ?>
+                                <button class="btn btn-success text-white px-4 rounded-pill" onclick="openModalForNew()">
+                                    <i class="fas fa-plus-circle me-2"></i>Nuevo Estudiante
+                                </button>
+                            <?php endif; ?>
+                        </div>
+                        <div class="col-md-5 col-lg-6">
+                            <div class="input-group">
+                                <span class="input-group-text bg-white border-end-0"><i class="fas fa-search"></i></span>
+                                <input type="text" id="searchInput" class="form-control border-start-0 ps-0" placeholder="Buscar por Cédula...">
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Diálogo CRUD (Solo útil para SECRETARIO, pero el HTML puede estar presente oculto) -->
-            <div id="dlg" class="easyui-dialog" style="width:400px"
-                data-options="closed:true,modal:true,border:'thin',buttons:'#dlg-buttons'">
-                <form id="fm" method="post" novalidate style="margin:0;padding:20px 50px">
-                    <h3>Informacion del Estudiante</h3>
-                    <div style="margin-bottom:10px">
-                        <input name="ID_EST" class="easyui-textbox" required="true" label="Cedula:" style="width:100%">
+            <!-- Tabla -->
+            <div class="card card-custom">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-custom mb-0 align-middle">
+                            <thead>
+                                <tr id="tableHeader">
+                                    <!-- Las columnas se generarán dinámicamente -->
+                                </tr>
+                            </thead>
+                            <tbody id="tableBody"></tbody>
+                        </table>
                     </div>
-                    <div style="margin-bottom:10px">
-                        <input name="NOM_EST" class="easyui-textbox" required="true" label="Nombre:" style="width:100%">
-                    </div>
-                    <div style="margin-bottom:10px">
-                        <input name="APE_EST" class="easyui-textbox" required="true" label="Apellido:" style="width:100%">
-                    </div>
-                    <div style="margin-bottom:10px">
-                        <input name="TEL_EST" class="easyui-textbox" required="true" label="Telefono:" style="width:100%">
-                    </div>
-                    <div style="margin-bottom:10px">
-                        <input name="COR_EST" class="easyui-textbox" required="true" validType="email" label="Email:"
-                            style="width:100%">
-                    </div>
-                    <div style="margin-bottom:10px">
-                        <input name="DIR_EST" class="easyui-textbox" required="true" label="Direccion:" style="width:100%">
-                    </div>
-                    <div style="margin-bottom:10px">
-                        <input name="FEC_NAC" class="easyui-textbox" required="true" type="date" label="FechaNac:"
-                            style="width:100%">
-                    </div>
-                </form>
+                </div>
             </div>
-            <div id="dlg-buttons">
-                <a href="javascript:void(0)" class="easyui-linkbutton c6" iconCls="icon-ok" onclick="saveUser()"
-                    style="width:90px">Guardar</a>
-                <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel"
-                    onclick="javascript:$('#dlg').dialog('close')" style="width:90px">Cancelar</a>
+        <?php else: ?>
+            <div class="card card-custom text-center py-5">
+                <div class="card-body">
+                    <h3>Acceso Restringido</h3>
+                    <p>No tienes permisos para acceder a esta sección.</p>
+                </div>
             </div>
-
-            <script type="text/javascript">
-                var url;
-                var searchTimer;
-
-                $(function () {
-                    $('#searchIdEst').textbox('textbox').on('keyup', function (e) {
-                        clearTimeout(searchTimer);
-
-                        var valor = this.value.trim();
-
-
-                        searchTimer = setTimeout(function () {
-                            doSearch(valor);
-                        }, 250);
-                    });
-                });
-
-                function doSearch(valorDesdeKeyup) {
-                    var $input = $('#searchIdEst').textbox('textbox');
-
-                    var searchValue = (typeof valorDesdeKeyup === 'string')
-                        ? valorDesdeKeyup.trim()
-                        : $input.val().trim();
-
-                    if (searchValue === "") {
-                        $('#dg').datagrid('options').url = 'models/obtener_estudiante.php';
-                    } else {
-                        $('#dg').datagrid('options').url =
-                            'models/obtener_estudiante_id.php?ID_EST=' + encodeURIComponent(searchValue);
-                    }
-
-                    $('#dg').datagrid('reload');
-
-                    $input.focus();
-                    var len = $input.val().length;
-                    if ($input[0].setSelectionRange) {
-                        $input[0].setSelectionRange(len, len);
-                    }
-                }
-
-
-                // --- FUNCIONES DE REPORTE ---
-                function generarReporte() {
-                    // Ejemplo: Usar el valor del buscador para generar un reporte filtrado
-                    var filtro = $('#searchIdEst').textbox('getValue');
-                    alert("Generando reporte. Filtro aplicado: " + (filtro ? filtro : "Ninguno"));
-                    // window.open('models/generar_pdf.php?filtro=' + filtro, '_blank');
-                }
-
-                function verEstadisticas() {
-                    alert("Mostrando estadísticas generales...");
-                }
-
-                // --- FUNCIONES CRUD (Solo funcionarán si el usuario tiene permisos en el backend también) ---
-                function newUser() {
-                    $('#dlg').dialog('open').dialog('center').dialog('setTitle', 'Nuevo Estudiante');
-                    $('#fm').form('clear');
-                    url = 'models/agregar_estudiante.php';
-                }
-                function editUser() {
-                    var row = $('#dg').datagrid('getSelected');
-                    if (row) {
-                        $('#dlg').dialog('open').dialog('center').dialog('setTitle', 'Editar Estudiante');
-                        $('#fm').form('load', row);
-                        url = 'models/actualizar_estudiante.php?ID_EST=' + row.ID_EST;
-                    }
-                }
-                function saveUser() {
-                    $('#fm').form('submit', {
-                        url: url,
-                        iframe: false,
-                        onSubmit: function () {
-                            return $(this).form('validate');
-                        },
-                        success: function (result) {
-                            var result = eval('(' + result + ')');
-                            if (result.errorMsg) {
-                                $.messager.show({
-                                    title: 'Error',
-                                    msg: result.errorMsg
-                                });
-                            } else {
-                                $('#dlg').dialog('close');
-                                $('#dg').datagrid('reload');
-                            }
-                        }
-                    });
-                }
-                function destroyUser() {
-                    var row = $('#dg').datagrid('getSelected');
-                    if (row) {
-                        $.messager.confirm('Confirmar', '¿Está seguro de eliminar este usuario?', function (r) {
-                            if (r) {
-                                $.post('models/eliminar_estudiante.php', { ID_EST: row.ID_EST }, function (result) {
-                                    if (result.success) {
-                                        $('#dg').datagrid('reload');
-                                    } else {
-                                        $.messager.show({
-                                            title: 'Error',
-                                            msg: result.errorMsg
-                                        });
-                                    }
-                                }, 'json');
-                            }
-                        });
-                    }
-                }
-            </script>
         <?php endif; ?>
     </div>
-</body>
 
+    <!-- Modal -->
+    <div class="modal fade" id="entityModal" tabindex="-1" aria-labelledby="modalTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle"></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="entityForm" novalidate>
+                        <!-- Los campos del formulario se generarán dinámicamente -->
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="saveEntity()">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        window.appConfig = { role: "<?php echo $rol; ?>" };
+    </script>
+    <script src="assets/js/main-entity.js"></script>
+    <script>
+        const studentConfig = {
+            entityName: 'Estudiante',
+            pluralEntityName: 'Estudiantes',
+            primaryKey: 'ID_EST',
+            urls: {
+                getAll: 'models/obtener_estudiante.php',
+                getById: 'models/obtener_estudiante_id.php',
+                add: 'models/agregar_estudiante.php',
+                update: 'models/actualizar_estudiante.php',
+                delete: 'models/eliminar_estudiante.php'
+            },
+            searchEnabled: true,
+            searchPlaceholder: 'Buscar por Cédula...',
+            tableColumns: [
+                { header: 'Cédula', field: 'ID_EST' },
+                { header: 'Nombre', field: 'NOM_EST' },
+                { header: 'Apellido', field: 'APE_EST' },
+                { header: 'Teléfono', field: 'TEL_EST' },
+                { header: 'Correo', field: 'COR_EST' },
+                { header: 'Dirección', field: 'DIR_EST' },
+                { 
+                    header: 'Fec. Nac.', 
+                    field: 'FEC_NAC', 
+                    formatter: (val) => {
+                        if (!val) return '';
+                        const [year, month, day] = val.split('-').map(Number);
+                        const date = new Date(year, month - 1, day); // Month is 0-indexed
+                        return date.toLocaleDateString('es-EC', { year: 'numeric', month: '2-digit', day: '2-digit' });
+                    }
+                }
+            ],
+            modalFields: [
+                { id: 'ID_EST', label: 'Cédula', type: 'text', required: true, pattern: '[0-9]{10}' },
+                { id: 'NOM_EST', label: 'Nombre', type: 'text', required: true },
+                { id: 'APE_EST', label: 'Apellido', type: 'text', required: true },
+                { id: 'TEL_EST', label: 'Teléfono', type: 'tel', required: true, pattern: '[0-9]{10}' },
+                { id: 'COR_EST', label: 'Correo', type: 'email', required: true },
+                { id: 'DIR_EST', label: 'Dirección', type: 'text', required: true },
+                { id: 'FEC_NAC', label: 'Fecha de Nacimiento', type: 'date', required: true }
+            ]
+        };
+
+        // Función para renderizar el formulario dinámicamente
+        function renderFormFields(fields) {
+            const form = document.getElementById('entityForm');
+            form.innerHTML = '';
+            fields.forEach(field => {
+                const div = document.createElement('div');
+                div.className = 'mb-3';
+                div.innerHTML = `
+                    <label for="${field.id}" class="form-label">${field.label}</label>
+                    <input type="${field.type}" class="form-control" id="${field.id}" name="${field.id}" 
+                           ${field.required ? 'required' : ''} 
+                           ${field.pattern ? `pattern="${field.pattern}"` : ''}>
+                    <div class="invalid-feedback">Campo inválido.</div>
+                `;
+                form.appendChild(div);
+            });
+        }
+        
+        // Función para renderizar el header de la tabla
+        function renderTableHeader(columns) {
+            const header = document.getElementById('tableHeader');
+            header.innerHTML = '';
+            columns.forEach(col => {
+                const th = document.createElement('th');
+                th.textContent = col.header;
+                header.appendChild(th);
+            });
+            if (window.appConfig.role === 'SECRETARIO') {
+                const th = document.createElement('th');
+                th.className = 'text-end';
+                th.textContent = 'Acciones';
+                header.appendChild(th);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            renderTableHeader(studentConfig.tableColumns);
+            renderFormFields(studentConfig.modalFields);
+            initializeEntityManagement(studentConfig);
+        });
+    </script>
+</body>
 </html>

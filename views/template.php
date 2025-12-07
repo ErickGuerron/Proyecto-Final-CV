@@ -49,6 +49,12 @@
                                 <li class="nav-item">
                                     <a class="nav-link" href="index.php?action=servicios">Servicios</a>
                                 </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="index.php?action=cursos">Cursos</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="index.php?action=inscripciones">Inscripciones</a>
+                                </li>
                             <?php endif; ?>
                             <?php if ($_SESSION['user']['ROL_USU'] === 'SECRETARIO' || $_SESSION['user']['ROL_USU'] === 'ADMIN'): ?>
                                 <li class="nav-item">
