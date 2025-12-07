@@ -1,4 +1,6 @@
 <?php
+    // Habilita buffering para evitar "headers already sent" cuando se hacen redirecciones
+    ob_start();
     session_start();
 
     include_once("controllers/controller.php");
@@ -10,4 +12,7 @@
     } else {
         $controller->plantilla();
     }
+
+    // Vacía el buffer y envía todo el contenido
+    ob_end_flush();
 ?>

@@ -92,6 +92,9 @@
                                 <button class="btn btn-outline-secondary rounded-pill px-3" onclick="generarReporte()" title="Generar reporte PDF">
                                     <i class="fas fa-file-pdf me-1"></i> Reporte
                                 </button>
+                                <button class="btn btn-outline-primary rounded-pill px-3" onclick="generarReporteListado()" title="Reporte de estudiantes">
+                                    <i class="fas fa-users me-1"></i> Estudiantes
+                                </button>
                                 <button class="btn btn-outline-info rounded-pill px-3" onclick="verEstadisticas()" title="Ver estadísticas">
                                     <i class="fas fa-chart-line me-1"></i> Stats
                                 </button>
@@ -227,7 +230,7 @@
                 <div class="modal-header border-0" style="background: linear-gradient(135deg, rgba(87, 92, 188, 0.08), rgba(101, 198, 142, 0.05)); padding: 1.5rem;">
                     <div class="d-flex align-items-center">
                         <div class="icon-box-indigo me-3" style="width: 50px; height: 50px; font-size: 1.3rem;">
-                            <i class="fas fa-user-graduate"></i>
+                            <i class="fas fa-users"></i>
                         </div>
                         <h5 class="modal-title fw-bold mb-0" id="modalTitle" style="color: var(--color-primary-indigo); font-size: 1.4rem;">
                             Estudiante
@@ -381,6 +384,21 @@
                         onclick="saveUser()">
                         <i class="fas fa-save me-2"></i>Guardar Datos
                     </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal visor de reportes -->
+    <div class="modal fade" id="reportViewerModal" tabindex="-1" aria-labelledby="reportViewerTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-xl" style="width:90vw;max-width:1100px">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title fw-bold" id="reportViewerTitle">Reporte</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body p-0" style="height:80vh;max-height:850px;min-height:480px; background:#f6f7fb;">
+                    <iframe id="reportViewerFrame" src="" title="Visor de reportes" style="width:100%; height:100%; border:0;"></iframe>
                 </div>
             </div>
         </div>

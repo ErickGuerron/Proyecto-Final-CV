@@ -13,6 +13,73 @@
     <script type="text/javascript" src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <!-- Luego cargamos EasyUI -->
     <script type="text/javascript" src="../assets/jquery/jquery.easyui.min.js"></script>
+
+    <!-- Estilos para modal custom de reportes (sin EasyUI) -->
+    <style>
+        .report-modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.35);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            z-index: 1050;
+            backdrop-filter: blur(2px);
+        }
+        .report-modal-backdrop.show {
+            display: flex;
+        }
+        .report-modal {
+            background: #fff;
+            width: 90vw;
+            max-width: 1100px;
+            height: 80vh;
+            max-height: 850px;
+            min-height: 480px;
+            border-radius: 16px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.18);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        .report-modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 18px;
+            border-bottom: 1px solid #e2e8f0;
+            background: linear-gradient(135deg, rgba(87, 92, 188, 0.05), rgba(101, 198, 142, 0.04));
+        }
+        .report-modal-title {
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #575cbc;
+        }
+        .report-modal-close {
+            border: none;
+            background: transparent;
+            font-size: 1.3rem;
+            line-height: 1;
+            color: #4a5568;
+            cursor: pointer;
+            padding: 6px;
+        }
+        .report-modal-close:hover {
+            color: #2d3748;
+        }
+        .report-modal-body {
+            flex: 1;
+            background: #f7fafc;
+        }
+        .report-modal-body iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+    </style>
 </head>
 
 <body>
@@ -69,6 +136,8 @@
                         <!-- GRUPO 2: REPORTES (Visible para ADMIN y SECRETARIO porque "secretaria tiene todo") -->
                         <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-print" plain="true"
                             onclick="generarReporte()">Reporte General</a>
+                        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-tip" plain="true"
+                            onclick="generarReporteListado()">Reporte Estudiantes</a>
                         <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-large-picture" plain="true"
                             onclick="verEstadisticas()">Estadísticas</a>
                     </div>
@@ -82,7 +151,7 @@
             </div>
 
             <!-- Diálogo CRUD (Solo útil para SECRETARIO, pero el HTML puede estar presente oculto) -->
-            <div id="dlg" class="easyui-dialog" style="width:400px"
+            <div id="dlg" class="easyui-dialog" style="width:520px"
                 data-options="closed:true,modal:true,border:'thin',buttons:'#dlg-buttons'">
                 <form id="fm" method="post" novalidate style="margin:0;padding:20px 50px">
                     <h3>Informacion del Estudiante</h3>
@@ -118,6 +187,19 @@
                     onclick="javascript:$('#dlg').dialog('close')" style="width:90px">Cancelar</a>
             </div>
 
+            <!-- Modal sencillo para previsualizar reportes (custom, sin EasyUI) -->
+            <div id="reportModal" class="report-modal-backdrop" aria-hidden="true">
+                <div class="report-modal" role="dialog" aria-labelledby="reportModalTitle">
+                    <div class="report-modal-header">
+                        <h5 class="report-modal-title" id="reportModalTitle">Reporte</h5>
+                        <button type="button" class="report-modal-close" id="reportModalClose" aria-label="Cerrar">&times;</button>
+                    </div>
+                    <div class="report-modal-body">
+                        <iframe id="reportFrame" src="" title="Vista previa de reporte"></iframe>
+                    </div>
+                </div>
+            </div>
+
             <script type="text/javascript">
                 var url;
                 var searchTimer;
@@ -133,6 +215,9 @@
                             doSearch(valor);
                         }, 250);
                     });
+
+                    // Inicializa modal custom de reportes al cargar la página
+                    setupReportModal();
                 });
 
                 function doSearch(valorDesdeKeyup) {
@@ -159,16 +244,79 @@
                 }
 
 
-                // --- FUNCIONES DE REPORTE ---
+                // --- FUNCIONES DE REPORTE (modal custom sin EasyUI) ---
+                function setupReportModal() {
+                    var backdrop = document.getElementById('reportModal');
+                    var closeBtn = document.getElementById('reportModalClose');
+
+                    if (closeBtn) {
+                        closeBtn.addEventListener('click', closeReportModal);
+                    }
+
+                    if (backdrop) {
+                        backdrop.addEventListener('click', function (e) {
+                            if (e.target === backdrop) {
+                                closeReportModal();
+                            }
+                        });
+                    }
+
+                    document.addEventListener('keydown', function (e) {
+                        if (e.key === 'Escape') {
+                            closeReportModal();
+                        }
+                    });
+                }
+
+                function openReportModal(url, title) {
+                    var backdrop = document.getElementById('reportModal');
+                    var frame = document.getElementById('reportFrame');
+                    var titleEl = document.getElementById('reportModalTitle');
+
+                    if (!backdrop || !frame) return;
+
+                    if (titleEl) {
+                        titleEl.textContent = title || 'Reporte';
+                    }
+
+                    frame.src = url;
+                    backdrop.classList.add('show');
+                    backdrop.setAttribute('aria-hidden', 'false');
+                }
+
+                function closeReportModal() {
+                    var backdrop = document.getElementById('reportModal');
+                    var frame = document.getElementById('reportFrame');
+
+                    if (frame) {
+                        frame.src = '';
+                    }
+
+                    if (backdrop) {
+                        backdrop.classList.remove('show');
+                        backdrop.setAttribute('aria-hidden', 'true');
+                    }
+                }
+
                 function generarReporte() {
-                    // Ejemplo: Usar el valor del buscador para generar un reporte filtrado
-                    var filtro = $('#searchIdEst').textbox('getValue');
-                    alert("Generando reporte. Filtro aplicado: " + (filtro ? filtro : "Ninguno"));
-                    // window.open('models/generar_pdf.php?filtro=' + filtro, '_blank');
+                    var filtro = $('#searchIdEst').textbox('getValue').trim();
+                    var hasFiltro = filtro !== '';
+
+                    var urlReporte = hasFiltro
+                        ? 'views/report_estudiante.php?id=' + encodeURIComponent(filtro)
+                        : 'views/report_estudiantes_registros.php';
+
+                    var titulo = hasFiltro ? 'Reporte de estudiante' : 'Reporte general';
+
+                    openReportModal(urlReporte, titulo);
+                }
+
+                function generarReporteListado() {
+                    openReportModal('views/report_estudiantes.php', 'Reporte de estudiantes');
                 }
 
                 function verEstadisticas() {
-                    alert("Mostrando estadísticas generales...");
+                    openReportModal('views/report_grafico_cursos.php', 'Estadísticas de cursos');
                 }
 
                 // --- FUNCIONES CRUD (Solo funcionarán si el usuario tiene permisos en el backend también) ---
