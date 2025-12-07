@@ -21,8 +21,4 @@
     .fitem input { width: 260px; }
 </style>
 
-<!-- Depuración visual (puedes borrar esto luego) -->
-<!-- <div style="background:red; color:white; padding:5px;">Rol detectado: <?php echo $rol; ?></div> -->
-
-<!-- AQUÍ LLAMAMOS AL MÓDULO CON LA LÓGICA -->
 <?php include "views/modules/servicios_jquery.php"; ?>

@@ -372,29 +372,7 @@
             loadModule('students');
             updateTimestamp();
             
-document.getElementById('confirmDeleteBtn').addEventListener('click', function() {
-            const config = modules[currentModule];
-            const formData = new FormData();
-            formData.append(config.pk, idToDelete);
 
-            // Ocultar modal
-            const modalEl = document.getElementById('deleteModal');
-            const modalInstance = bootstrap.Modal.getInstance(modalEl);
-            modalInstance.hide();
-
-            // Petición al servidor
-            fetch(config.urlDelete, { method: 'POST', body: formData })
-                .then(res => res.json())
-                .then(data => {
-                    if(data.success || data.ok) {
-                        fetchData(); // Recargar tabla
-                        showNotification('Registro eliminado correctamente', 'success');
-                    } else {
-                        showNotification(data.errorMsg || 'Error al eliminar', 'error');
-                    }
-                })
-                .catch(err => showNotification('Error de red al eliminar', 'error'));
-        });
 
             // Buscador
             document.getElementById('searchInput').addEventListener('keyup', function() {

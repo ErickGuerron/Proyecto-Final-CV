@@ -174,13 +174,13 @@
         <div class="fitem">
             <label>Estudiante:</label>
             <input name="ID_EST_INS" class="easyui-combobox" required="true" style="width:260px;"
-                data-options="valueField:'ID_EST',textField:'NOM_EST',url:'models/obtener_estudiante.php',
+                data-options="valueField:'ID_EST',textField:'NOM_EST',url:'models/obtener_estudiante.php', editable:false,
                 formatter: function(row){ return row.ID_EST + ' - ' + row.NOM_EST + ' ' + row.APE_EST; }">
         </div>
         <div class="fitem">
             <label>Curso:</label>
             <input name="ID_CUR_INS" class="easyui-combobox" required="true" style="width:260px;"
-                data-options="valueField:'ID_CUR',textField:'NOM_CUR',url:'models/obtener_cursos.php',
+                data-options="valueField:'ID_CUR',textField:'NOM_CUR',url:'models/obtener_cursos.php', editable:false,
                 formatter: function(row){ return row.ID_CUR + ' - ' + row.NOM_CUR; }">
         </div>
     </form>
@@ -210,11 +210,11 @@
     function handleFormResponse(result, dialogId, gridId, successMsg) {
         try {
             var data = JSON.parse(result);
-            // Validamos si el backend devuelve 'error', 'errorMsg' o 'success':false
-            if (data.error || data.errorMsg || data.success === false) {
+            // Validamos si el backend devuelve 'error', 'errorMsg', 'success':false o 'ok':false
+            if (data.error || data.errorMsg || !data.ok) {
                 $.messager.alert({
                     title: 'Error de Validación',
-                    msg: '<span style="color:red; font-weight:bold">' + (data.error || data.errorMsg || "Error desconocido") + '</span>',
+                    msg: '<span style="color:red; font-weight:bold">' + (data.error || data.errorMsg || data.mensaje || "Error desconocido") + '</span>',
                     icon: 'error',
                     width: 400
                 });
@@ -369,7 +369,34 @@
             url: url,
             onSubmit: function(){ return $(this).form('validate'); },
             success: function(result){
-                handleFormResponse(result, '#dlg-ins', '#dg-ins', 'Inscripción procesada correctamente');
+                console.log("Success callback for saveEnrollment fired. Result:", result); // Debugging log
+                try {
+                    var data = JSON.parse(result);
+                    if (data.ok) {
+                        $('#dlg-ins').dialog('close');
+                        $('#dg-ins').datagrid('reload');
+                        $.messager.show({
+                            title: 'Éxito',
+                            msg: 'Inscripción procesada correctamente',
+                            timeout: 3000,
+                            showType: 'slide'
+                        });
+                    } else {
+                        $.messager.alert({
+                            title: 'Error de Validación',
+                            msg: '<span style="color:red; font-weight:bold">' + (data.mensaje || "Error desconocido") + '</span>',
+                            icon: 'error',
+                            width: 400
+                        });
+                    }
+                } catch(e) {
+                    console.error("Error al parsear JSON o en la lógica de success:", e);
+                    $.messager.alert({
+                        title: 'Error del Sistema',
+                        msg: 'Ocurrió un error inesperado al procesar la respuesta. Revise la consola.',
+                        icon: 'error'
+                    });
+                }
             }
         });
     }

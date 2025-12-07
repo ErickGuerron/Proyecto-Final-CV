@@ -7,7 +7,7 @@ try {
     $conn = Database::getInstance()->getConnection();
 
     // El ID de la inscripción viene por GET, los datos a actualizar por POST
-    $id_ins = $_GET["ID_INS"] ?? null;
+    $id_ins = $_POST["ID_INS"] ?? null;
     $id_est_ins = $_POST["ID_EST_INS"] ?? null;
     $id_cur_ins = $_POST["ID_CUR_INS"] ?? null;
 

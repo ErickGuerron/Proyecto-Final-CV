@@ -412,7 +412,12 @@ function saveEntity() {
     fetch(currentUrl, { method: 'POST', body: formData })
     .then(response => response.json())
     .then(result => {
-        const isSuccess = result.success === true || result.ok === true;
+        // Log the full result for debugging
+        console.log("Backend Response:", result);
+
+        // Determine success more robustly: check for explicit success/ok, AND ensure no "Error:" in message
+        const isSuccess = (result.success === true || result.ok === true) && (!result.mensaje || !result.mensaje.includes('Error:'));
+
         if (isSuccess) {
             modalInstance.hide();
             showNotification(result.mensaje || '✅ Datos guardados', 'success');
@@ -498,6 +503,7 @@ function showDeleteConfirmModal(id, name, onConfirm) {
 // UTILIDADES Y NOTIFICACIONES
 // =========================================
 function showNotification(message, type = 'info') {
+    console.log(`Notification: ${type.toUpperCase()} - ${message}`);
     const toast = document.createElement('div');
     const icons = { success: 'fa-check-circle', error: 'fa-exclamation-circle', warning: 'fa-exclamation-triangle', info: 'fa-info-circle' };
     const colors = { success: '#65c68e', error: '#ef4444', warning: '#e6924d', info: '#575cbc' };
