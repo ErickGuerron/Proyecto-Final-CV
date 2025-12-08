@@ -1,4 +1,7 @@
 <?php
+// Opcional pero recomendable si usas PHP 7+
+declare(strict_types=1);
+
 include_once "database.php";
 
 header('Content-Type: application/json; charset=utf-8');
@@ -11,7 +14,7 @@ try {
           ?? $_GET['ID_EST']   ?? $_GET['id_est']
           ?? '';
 
-    $idEst = trim($idEst);
+    $idEst = is_string($idEst) ? trim($idEst) : '';
 
     // SELECT base reutilizable
     $baseSql = "
@@ -29,14 +32,19 @@ try {
     if ($idEst !== '') {
         // Modo filtrado por ID, Nombre o Apellido (prefijo)
         $sql = $baseSql . " 
-            WHERE ID_EST LIKE :id_est 
-            OR NOM_EST LIKE :id_est
-            OR APE_EST LIKE :id_est
+            WHERE ID_EST  LIKE :id_est
+               OR NOM_EST LIKE :nom_est
+               OR APE_EST LIKE :ape_est
             ORDER BY ID_EST";
+
         $stmt = $conn->prepare($sql);
-        $searchTerm = '%' . $idEst . '%'; // Buscar en cualquier parte del nombre/apellido
+        $searchTerm = '%' . $idEst . '%'; // Buscar en cualquier parte del ID/nombre/apellido
+
+        // Usamos parámetros distintos para evitar el error HY093
         $stmt->execute([
-            ':id_est' => $searchTerm
+            ':id_est'  => $searchTerm,
+            ':nom_est' => $searchTerm,
+            ':ape_est' => $searchTerm
         ]);
     } else {
         // Modo listado completo
@@ -44,9 +52,13 @@ try {
         $stmt = $conn->query($sql);
     }
 
+    if ($stmt === false) {
+        throw new PDOException('Error al ejecutar la consulta de estudiantes.');
+    }
+
     $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // Importante: se mantiene como array plano, sin 'success' ni 'rows'
+    // Se mantiene como array plano, sin 'success' ni 'rows'
     echo json_encode($rows, JSON_UNESCAPED_UNICODE);
 
 } catch (PDOException $e) {

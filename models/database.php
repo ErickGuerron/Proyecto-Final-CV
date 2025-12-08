@@ -1,72 +1,64 @@
 <?php
-class Database {
+// models/database.php
+
+class Database
+{
+    /** @var Database|null */
     private static $instance = null;
-    private $conn;
 
-    private $host;
-    private $port;
-    private $user;
-    private $pass;
-    private $name;
+    /** @var \PDO */
+    private $connection;
 
-    private function __construct() {
-        $this->loadEnv(__DIR__ . '/../.env');
+    /**
+     * Constructor privado: solo se llama desde getInstance()
+     */
+    private function __construct()
+    {
+        // Variables de entorno definidas en tu .env
+        $host = getenv('DB_HOST') ?: 'gateway01.us-east-1.prod.aws.tidbcloud.com';
+        $port = getenv('DB_PORT') ?: '4000';
+        $db   = getenv('DB_NAME') ?: 'PHP_ACADEMIA';
+        $user = getenv('DB_USER') ?: 'root';
+        $pass = getenv('DB_PASSWORD') ?: '';
 
-        $this->host = getenv('HOST');
-        $this->port = getenv('PORT');
-        $this->user = getenv('USERNAME'); // Changed from USER to USERNAME as per .env file
-        $this->pass = getenv('PASSWORD');
-        $this->name = getenv('DATABASE');
+        $dsn = "mysql:host={$host};port={$port};dbname={$db};charset=utf8mb4";
 
-        $ssl_ca = __DIR__ . '/../config/isrgrootx1.pem';
+        $options = [
+            \PDO::ATTR_ERRMODE            => \PDO::ERRMODE_EXCEPTION,
+            \PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC,
+            \PDO::ATTR_EMULATE_PREPARES   => false,
+            // Certificado raíz para TiDB Cloud (ajusta la ruta si es distinta)
+            \PDO::MYSQL_ATTR_SSL_CA       => __DIR__ . '/../config/isrgrootx1.pem',
+            // Para desarrollo puedes desactivar la verificación estricta.
+            \PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT => false,
+        ];
 
         try {
-            $this->conn = new PDO(
-                "mysql:host={$this->host};port={$this->port};dbname={$this->name};", 
-                $this->user, 
-                $this->pass,
-                [
-                    PDO::MYSQL_ATTR_SSL_CA => $ssl_ca,
-                ]
+            $this->connection = new \PDO($dsn, $user, $pass, $options);
+        } catch (\PDOException $e) {
+            throw new \RuntimeException(
+                'Error al conectar con la base de datos: ' . $e->getMessage()
             );
-            $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        } catch(PDOException $e) {
-            echo "Connection failed: " . $e->getMessage();
         }
     }
 
-    // Function to load .env file
-    private function loadEnv($path) {
-        if (!file_exists($path)) {
-            return;
+    /**
+     * Devuelve la única instancia de Database (singleton)
+     */
+    public static function getInstance(): self
+    {
+        if (self::$instance === null) {
+            self::$instance = new self();
         }
 
-        $lines = file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-        foreach ($lines as $line) {
-            if (strpos(trim($line), '#') === 0) {
-                continue;
-            }
-
-            list($name, $value) = explode('=', $line, 2);
-            $name = trim($name);
-            $value = trim($value);
-
-            if (!array_key_exists($name, $_SERVER) && !array_key_exists($name, $_ENV)) {
-                putenv(sprintf('%s=%s', $name, $value));
-                $_ENV[$name] = $value;
-                $_SERVER[$name] = $value;
-            }
-        }
-    }
-
-    public static function getInstance() {
-        if(!self::$instance) {
-            self::$instance = new Database();
-        }
         return self::$instance;
     }
 
-    public function getConnection() {
-        return $this->conn;
+    /**
+     * Devuelve el objeto PDO ya inicializado
+     */
+    public function getConnection(): \PDO
+    {
+        return $this->connection;
     }
 }

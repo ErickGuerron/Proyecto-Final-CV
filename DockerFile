@@ -2,15 +2,21 @@ FROM php:8.2-fpm-alpine
 
 WORKDIR /var/www/html
 
-# Instalar certificados CA y extension PDO MySQL (necesaria para TiDB/MySQL)
-RUN apk add --no-cache ca-certificates \
-    && update-ca-certificates \
+# Dependencias + pdo_mysql (como ya lo tienes)
+RUN apk add --no-cache --virtual .build-deps $PHPIZE_DEPS \
+    && docker-php-ext-configure pdo_mysql --with-pdo-mysql=mysqlnd \
     && docker-php-ext-install pdo_mysql \
+    && apk del .build-deps \
+    && apk add --no-cache ca-certificates \
+    && update-ca-certificates \
     && mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini" \
     && sed -i 's/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/' "$PHP_INI_DIR/php.ini"
 
+# Copiar código de la app
 COPY . .
 
-EXPOSE 9000
+# Copiar explícitamente el .env (opcional pero claro)
+COPY .env .env
 
+EXPOSE 9000
 CMD ["php-fpm", "-F"]
