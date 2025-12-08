@@ -7,40 +7,36 @@ try {
     $conn = Database::getInstance()->getConnection();
 
     // Aceptar el parámetro tanto en mayúsculas como en minúsculas, por GET o POST
-    $idEst = $_POST['ID_EST']  ?? $_POST['id_est']
-          ?? $_GET['ID_EST']   ?? $_GET['id_est']
+    $idCur = $_POST['ID_CUR']  ?? $_POST['id_cur']
+          ?? $_GET['ID_CUR']   ?? $_GET['id_cur']
           ?? '';
 
-    $idEst = trim($idEst);
+    $idCur = trim($idCur);
 
     // SELECT base reutilizable
     $baseSql = "
         SELECT 
-            ID_EST,
-            NOM_EST,
-            APE_EST,
-            TEL_EST,
-            COR_EST,
-            DIR_EST,
-            FEC_NAC
-        FROM ESTUDIANTES
+            ID_CUR,
+            NOM_CUR,
+            DES_CUR,
+            FEC_CRE
+        FROM CURSOS
     ";
 
-    if ($idEst !== '') {
-        // Modo filtrado por ID, Nombre o Apellido (prefijo)
+    if ($idCur !== '') {
+        // Modo filtrado por ID o Nombre (prefijo)
         $sql = $baseSql . " 
-            WHERE ID_EST LIKE :id_est 
-            OR NOM_EST LIKE :id_est
-            OR APE_EST LIKE :id_est
-            ORDER BY ID_EST";
+            WHERE ID_CUR LIKE :id_cur 
+            OR NOM_CUR LIKE :id_cur
+            ORDER BY ID_CUR";
         $stmt = $conn->prepare($sql);
-        $searchTerm = '%' . $idEst . '%'; // Buscar en cualquier parte del nombre/apellido
+        $searchTerm = '%' . $idCur . '%'; // Buscar en cualquier parte del nombre
         $stmt->execute([
-            ':id_est' => $searchTerm
+            ':id_cur' => $searchTerm
         ]);
     } else {
         // Modo listado completo
-        $sql = $baseSql . " ORDER BY ID_EST";
+        $sql = $baseSql . " ORDER BY ID_CUR";
         $stmt = $conn->query($sql);
     }
 
@@ -53,7 +49,7 @@ try {
     http_response_code(500);
     echo json_encode([
         'success'  => false,
-        'errorMsg' => 'Error al obtener estudiantes.',
+        'errorMsg' => 'Error al obtener cursos.',
         'detalle'  => $e->getMessage()
     ], JSON_UNESCAPED_UNICODE);
 }

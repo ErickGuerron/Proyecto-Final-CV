@@ -208,7 +208,7 @@
 }
 
 .table-custom thead th {
-    color: white !important; /* Forzar color blanco */
+    color: white;
     font-weight: 700;
     text-transform: uppercase;
     font-size: 0.8rem;
@@ -219,9 +219,8 @@
     white-space: nowrap;
 }
 
-/* Asegurar que los iconos también sean blancos */
 .table-custom thead th i {
-    color: white !important;
+    color: white;
     opacity: 0.9;
 }
 
@@ -258,7 +257,6 @@
     border: none;
 }
 
-/* Primera columna (Cédula) destacada */
 .table-custom tbody td:first-child {
     font-weight: 700;
     color: var(--color-primary-indigo);
@@ -284,7 +282,6 @@
     cursor: pointer;
 }
 
-/* Botón Editar */
 .btn-action-edit {
     background-color: rgba(87, 92, 188, 0.1);
     color: var(--color-primary-indigo);
@@ -298,7 +295,6 @@
     box-shadow: 0 4px 12px rgba(87, 92, 188, 0.35);
 }
 
-/* Botón Eliminar */
 .btn-action-delete {
     background-color: rgba(239, 68, 68, 0.1);
     color: #ef4444;
@@ -367,7 +363,6 @@
     padding: 2rem;
 }
 
-/* Inputs flotantes del modal */
 .form-floating > .form-control:focus ~ label {
     color: var(--color-primary-indigo);
 }
@@ -383,7 +378,6 @@
     transition: all 0.3s ease;
 }
 
-/* Botones del modal */
 .modal-footer {
     padding: 1.5rem;
     background-color: #f9fafb;
@@ -445,7 +439,6 @@
     animation: fadeIn 0.3s ease-in-out;
 }
 
-/* Efecto de pulso para notificaciones */
 @keyframes pulse {
     0%, 100% { transform: scale(1); }
     50% { transform: scale(1.05); }
@@ -454,93 +447,32 @@
 .notification-badge {
     animation: pulse 2s infinite;
 }
-/* =========================================
-   FIX URGENTE - TEXTO INVISIBLE
-   Agrega esto DESPUÉS de tabla.css en tu HTML
-   ========================================= */
-
-/* Forzar que todo el texto del tbody sea visible */
-.table-custom tbody,
-.table-custom tbody tr,
-.table-custom tbody td,
-.table-custom tbody td *,
-.table-custom tbody span,
-.table-custom tbody i {
-    color: #1A202C !important;
-}
-
-/* Primera columna (cédula) en índigo */
-.table-custom tbody td:first-child {
-    color: #575cbc !important;
-    font-weight: 700 !important;
-}
-
-/* Iconos en gris */
-.table-custom tbody i.fa-phone-alt,
-.table-custom tbody i.fa-envelope,
-.table-custom tbody i.fa-map-marker-alt,
-.table-custom tbody i.fa-calendar {
-    color: #718096 !important;
-}
-
-/* Encabezados en blanco */
-.table-custom thead th,
-.table-custom thead th *,
-.table-custom thead i {
-    color: rgb(0, 0, 0) !important;
-}
-
-/* Asegurar que los estados de carga también sean visibles */
-.loading-state,
-.loading-state *,
-.empty-state,
-.empty-state * {
-    color: #4A5568 !important;
-}
-
-.loading-state i {
-    color: #575cbc !important;
-}
-
-/* Estados de error en rojo */
-.text-danger,
-.text-danger * {
-    color: #ef4444 !important;
-}
 
 /* =========================================
-   BOTONES DE NAVEGACIÓN (TABS/PILLS) - FIX VISIBILIDAD
+   AUTOCOMPLETE DROPDOWN PARA FORMULARIOS
    ========================================= */
-.nav-pills {
-    background: transparent;
-    padding: 5px;
+.dropdown {
+    position: relative;
 }
 
-.nav-pills .nav-link {
-    /* Fondo gris claro por defecto para que se vea el "botón" */
-    background-color: #e9ecef !important; 
-    /* Texto oscuro forzado */
-    color: #495057 !important;
-    border: 1px solid #dee2e6;
-    margin-right: 10px;
-    font-weight: 700;
-    transition: all 0.3s ease;
+.dropdown-menu {
+    max-height: 200px;
+    overflow-y: auto;
+    border-radius: 12px;
+    box-shadow: var(--shadow-medium);
+    border: 1px solid #e2e8f0;
 }
 
-.nav-pills .nav-link:hover {
-    background-color: #dee2e6 !important;
-    color: #575cbc !important; /* Color Indigo al pasar el mouse */
-    transform: translateY(-2px);
+.dropdown-item {
+    padding: 0.75rem 1.25rem;
+    font-size: 0.9rem;
+    transition: background-color 0.2s ease;
 }
 
-.nav-pills .nav-link.active {
-    /* Gradiente Indigo cuando está activo */
-    background: linear-gradient(135deg, #575cbc, #4b4ea5) !important;
-    color: #ffffff !important;
-    border-color: transparent;
-    box-shadow: 0 4px 12px rgba(87, 92, 188, 0.3);
+.dropdown-item:hover {
+    background-color: rgba(87, 92, 188, 0.08);
 }
 
-.nav-pills .nav-link i {
-    margin-right: 8px;
+.dropdown-item strong {
+    color: var(--color-primary-indigo);
 }
