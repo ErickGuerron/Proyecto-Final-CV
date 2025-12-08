@@ -1,0 +1,28 @@
+FROM php:8.2-apache
+
+# Directorio de trabajo
+WORKDIR /var/www/html
+
+# Instalar extensiones necesarias para MySQL
+RUN apt-get update \
+    && apt-get install -y \
+        libpng-dev \
+        libonig-dev \
+        libxml2-dev \
+    && docker-php-ext-install pdo pdo_mysql \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copiar el código de la aplicación al docroot de Apache
+COPY . /var/www/html
+
+# (Opcional) si usas .htaccess / rutas amigables
+# RUN a2enmod rewrite
+
+# Permisos
+RUN chown -R www-data:www-data /var/www/html
+
+# Apache escucha en 80 (Railway suele trabajar bien con esto;
+# si quieres, en Railway puedes poner la variable PORT=80)
+EXPOSE 80
+
+CMD ["apache2-foreground"]
