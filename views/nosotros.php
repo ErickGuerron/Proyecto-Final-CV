@@ -11,12 +11,15 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <!-- Tu Hoja de Estilos Personalizada -->
     <link href="assets/css/tabla.css" rel="stylesheet">
+    <script src="assets/js/validaciones.js"></script>
 </head>
 
 <body>
     <?php 
         if(!isset($_SESSION)) { session_start(); }
         $rol = isset($_SESSION['user']['ROL_USU']) ? $_SESSION['user']['ROL_USU'] : 'GUEST'; 
+        // Solo SECRETARIO puede crear/editar/eliminar
+        $puedeGestionar = ($rol === 'SECRETARIO');
     ?>
 
     <!-- Fondo Decorativo -->
@@ -93,7 +96,7 @@
                     <div class="row align-items-center g-3">
                         <div class="col-md-7 col-lg-6">
                             <div class="d-flex flex-wrap gap-2">
-                                <?php if ($rol === 'SECRETARIO' || $rol === 'ADMIN'): ?>
+                                <?php if ($puedeGestionar): ?>
                                     <button class="btn btn-success text-white px-4 rounded-pill" id="btnNew" onclick="openCreateModal()">
                                         <i class="fas fa-plus-circle me-2"></i>Nuevo Estudiante
                                     </button>
@@ -339,6 +342,10 @@
     
     <!-- LÓGICA INTEGRADA -->
     <script>
+        // --- ROL Y PERMISOS DESDE BACKEND ---
+        const userRole = '<?php echo $rol; ?>';
+        const canModify = (userRole === 'SECRETARIO'); // Solo SECRETARIO modifica datos
+
         // --- CONFIGURACIÓN ---
         let currentModule = 'students';
         let isEditing = false;
@@ -356,8 +363,13 @@
                 urlDelete: 'models/eliminar_estudiante.php',
                 headers: `
                     <tr>
-                        <th>Cédula</th><th>Nombre</th><th>Apellido</th><th>Teléfono</th><th>Correo</th><th>Fec. Nac.</th>
-                        <th class="text-end">Acciones</th>
+                        <th>Cédula</th>
+                        <th>Nombre</th>
+                        <th>Apellido</th>
+                        <th>Teléfono</th>
+                        <th>Correo</th>
+                        <th>Fec. Nac.</th>
+                        ${canModify ? '<th class="text-end">Acciones</th>' : ''}
                     </tr>`
             },
             courses: {
@@ -371,8 +383,11 @@
                 urlDelete: 'models/eliminar_curso.php',
                 headers: `
                     <tr>
-                        <th>ID</th><th>Curso</th><th>Descripción</th><th>Fec. Creación</th>
-                        <th class="text-end">Acciones</th>
+                        <th>ID</th>
+                        <th>Curso</th>
+                        <th>Descripción</th>
+                        <th>Fec. Creación</th>
+                        ${canModify ? '<th class="text-end">Acciones</th>' : ''}
                     </tr>`
             },
             enrollments: {
@@ -386,8 +401,11 @@
                 urlDelete: 'models/eliminar_inscripcion.php',
                 headers: `
                     <tr>
-                        <th>ID</th><th>Estudiante</th><th>Curso</th><th>Fecha</th>
-                        <th class="text-end">Acciones</th>
+                        <th>ID</th>
+                        <th>Estudiante</th>
+                        <th>Curso</th>
+                        <th>Fecha</th>
+                        ${canModify ? '<th class="text-end">Acciones</th>' : ''}
                     </tr>`
             }
         };
@@ -396,8 +414,6 @@
         document.addEventListener('DOMContentLoaded', () => {
             loadModule('students');
             updateTimestamp();
-            
-
 
             // Buscador
             document.getElementById('searchInput').addEventListener('keyup', function() {
@@ -444,7 +460,12 @@
             document.getElementById('tableHead').innerHTML = config.headers;
             
             const btn = document.getElementById('btnNew');
-            if(btn) btn.innerHTML = `<i class="fas fa-plus-circle me-2"></i>${config.btnText}`;
+            if(btn && canModify) {
+                btn.innerHTML = `<i class="fas fa-plus-circle me-2"></i>${config.btnText}`;
+                btn.style.display = ''; // visible
+            } else if (btn && !canModify) {
+                btn.style.display = 'none';
+            }
             
             document.querySelectorAll('.nav-link').forEach(btn => {
                 btn.classList.remove('active');
@@ -465,15 +486,33 @@
             const config = modules[currentModule];
             const tbody = document.getElementById('tableBody');
             const counter = document.getElementById('recordCount');
+
+            const columnsByModule = {
+                students: canModify ? 7 : 6,
+                courses: canModify ? 5 : 4,
+                enrollments: canModify ? 5 : 4
+            };
+            const colSpan = columnsByModule[currentModule] || 1;
             
-            tbody.innerHTML = '<tr><td colspan="7" class="text-center py-5 text-muted"><i class="fas fa-spinner fa-spin fa-2x"></i><p>Cargando...</p></td></tr>';
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="${colSpan}" class="text-center py-5 text-muted">
+                        <i class="fas fa-spinner fa-spin fa-2x"></i>
+                        <p>Cargando...</p>
+                    </td>
+                </tr>`;
 
             fetch(config.urlGet)
                 .then(res => res.json())
                 .then(data => {
                     tbody.innerHTML = '';
                     if(!data || data.length === 0) {
-                        tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4">No hay registros encontrados.</td></tr>';
+                        tbody.innerHTML = `
+                            <tr>
+                                <td colspan="${colSpan}" class="text-center py-4">
+                                    No hay registros encontrados.
+                                </td>
+                            </tr>`;
                         counter.innerHTML = '<i class="fas fa-users me-1"></i>0 registros';
                         return;
                     }
@@ -485,18 +524,40 @@
                         const jsonItem = JSON.stringify(item).replace(/"/g, '&quot;');
                         
                         if(currentModule === 'students') {
-                            html = `<td>${item.ID_EST}</td><td>${item.NOM_EST}</td><td>${item.APE_EST}</td><td>${item.TEL_EST}</td><td>${item.COR_EST}</td><td>${item.FEC_NAC}</td>`;
+                            html = `
+                                <td>${item.ID_EST}</td>
+                                <td>${item.NOM_EST}</td>
+                                <td>${item.APE_EST}</td>
+                                <td>${item.TEL_EST}</td>
+                                <td>${item.COR_EST}</td>
+                                <td>${item.FEC_NAC}</td>`;
                         } else if(currentModule === 'courses') {
-                            html = `<td>${item.ID_CUR}</td><td>${item.NOM_CUR}</td><td>${item.DES_CUR}</td><td>${item.FEC_CRE}</td>`;
+                            html = `
+                                <td>${item.ID_CUR}</td>
+                                <td>${item.NOM_CUR}</td>
+                                <td>${item.DES_CUR}</td>
+                                <td>${item.FEC_CRE}</td>`;
                         } else {
-                            html = `<td>${item.ID_INS}</td><td>${item.NOM_EST} ${item.APE_EST}</td><td>${item.NOM_CUR}</td><td>${item.FEC_INS}</td>`;
+                            html = `
+                                <td>${item.ID_INS}</td>
+                                <td>${item.NOM_EST} ${item.APE_EST}</td>
+                                <td>${item.NOM_CUR}</td>
+                                <td>${item.FEC_INS}</td>`;
                         }
 
-                        html += `
-                            <td class="text-end">
-                                <button class="btn btn-sm btn-outline-warning btn-circle" onclick="openEdit(${jsonItem})" title="Editar"><i class="fas fa-pen"></i></button>
-                                <button class="btn btn-sm btn-outline-danger btn-circle" onclick="deleteItem('${item[config.pk]}')" title="Eliminar"><i class="fas fa-trash"></i></button>
-                            </td>`;
+                        if (canModify) {
+                            html += `
+                                <td class="text-end">
+                                    <button class="btn btn-sm btn-outline-warning btn-circle"
+                                            onclick="openEdit(${jsonItem})" title="Editar">
+                                        <i class="fas fa-pen"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger btn-circle"
+                                            onclick="deleteItem('${item[config.pk]}')" title="Eliminar">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>`;
+                        }
                         
                         const tr = document.createElement('tr');
                         tr.innerHTML = html;
@@ -504,13 +565,23 @@
                     });
                 })
                 .catch(err => {
-                    tbody.innerHTML = '<tr><td colspan="7" class="text-center text-danger">Error al cargar datos.</td></tr>';
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="${colSpan}" class="text-center text-danger">
+                                Error al cargar datos.
+                            </td>
+                        </tr>`;
                     showNotification('Error de conexión con el servidor', 'error');
                 });
         }
 
         // --- ACCIONES MODAL ---
         function openCreateModal() {
+            if (!canModify) {
+                showNotification('Su rol solo puede consultar datos y generar reportes. No puede crear registros.', 'error');
+                return;
+            }
+
             isEditing = false;
             const config = modules[currentModule];
             document.querySelector(`#${config.modalId} form`).reset();
@@ -523,6 +594,11 @@
         }
 
         function openEdit(item) {
+            if (!canModify) {
+                showNotification('Su rol solo puede consultar datos y generar reportes. No puede editar registros.', 'error');
+                return;
+            }
+
             isEditing = true;
             const config = modules[currentModule];
             const form = document.querySelector(`#${config.modalId} form`);
@@ -542,6 +618,11 @@
         }
 
         function saveData() {
+            if (!canModify) {
+                showNotification('Su rol solo puede consultar datos y generar reportes. No puede guardar cambios.', 'error');
+                return;
+            }
+
             const config = modules[currentModule];
             const form = document.querySelector(`#${config.modalId} form`);
             
@@ -569,6 +650,11 @@
         }
 
         function deleteItem(id) {
+            if (!canModify) {
+                showNotification('Su rol solo puede consultar datos y generar reportes. No puede eliminar registros.', 'error');
+                return;
+            }
+
             // 1. Guardamos el ID en la variable global
             idToDelete = id; 
             
@@ -582,30 +668,35 @@
         }
 
         document.getElementById('confirmDeleteBtn').addEventListener('click', function() {
-        const config = modules[currentModule];
-        const formData = new FormData();
-        formData.append(config.pk, idToDelete);
+            if (!canModify) {
+                showNotification('Su rol no tiene permisos para eliminar registros.', 'error');
+                return;
+            }
 
-        // 1. Ocultar modal
-        const modalInstance = bootstrap.Modal.getInstance(document.getElementById('deleteModal'));
-        if (modalInstance) modalInstance.hide();
+            const config = modules[currentModule];
+            const formData = new FormData();
+            formData.append(config.pk, idToDelete);
 
-        // 2. Petición al servidor
-        fetch(config.urlDelete, { method: 'POST', body: formData })
-            .then(res => res.json())
-            .then(data => {
-                if(data.success || data.ok) {
-                    fetchData(); // Recargar tabla
-                    showNotification('Registro eliminado correctamente', 'success');
-                } else {
-                    showNotification(data.errorMsg || 'Error al eliminar', 'error');
-                }
-            })
-            .catch(err => {
-                console.error(err);
-                showNotification('Error de conexión', 'error');
-            });
-    });
+            // 1. Ocultar modal
+            const modalInstance = bootstrap.Modal.getInstance(document.getElementById('deleteModal'));
+            if (modalInstance) modalInstance.hide();
+
+            // 2. Petición al servidor
+            fetch(config.urlDelete, { method: 'POST', body: formData })
+                .then(res => res.json())
+                .then(data => {
+                    if(data.success || data.ok) {
+                        fetchData(); // Recargar tabla
+                        showNotification('Registro eliminado correctamente', 'success');
+                    } else {
+                        showNotification(data.errorMsg || 'Error al eliminar', 'error');
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    showNotification('Error de conexión', 'error');
+                });
+        });
 
         // --- UTILIDADES ---
         function loadCombos(selEst = null, selCur = null) {
@@ -633,13 +724,13 @@
 
         function generarReporte() {
             showNotification('Generando reporte PDF, por favor espere...', 'info');
-            // Aquí puedes redirigir a tu script de reporte real
-            // window.open('views/report_estudiante.php', '_blank'); 
+            // Esta función es sobreescrita más abajo por el módulo de visor,
+            // aquí se deja únicamente como fallback visual.
         }
 
         function verEstadisticas() {
             showNotification('Cargando módulo de estadísticas...', 'info');
-            // Lógica futura
+            // Lógica futura (la implementación principal está en el segundo script)
         }
         
         function updateTimestamp() {
@@ -741,7 +832,6 @@
                     const firstCell = row.querySelector('td');
                     if (firstCell) {
                         window.selectedStudentId = firstCell.textContent.trim();
-                        // Opcional: log para depuración
                         console.log('Estudiante seleccionado:', window.selectedStudentId);
                     }
                 });
@@ -750,4 +840,3 @@
     </script>
 </body>
 </html>
-

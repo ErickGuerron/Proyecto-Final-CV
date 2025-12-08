@@ -8,7 +8,7 @@ require_once __DIR__ . '/../models/database.php';
 require_once __DIR__ . '/../assets/fpdf186/fpdf.php';
 
 class PDF extends FPDF
-{
+{   
     /**
      * Normaliza texto UTF-8 a ISO-8859-1 para FPDF evitando utf8_decode().
      */
@@ -237,8 +237,15 @@ class PDF extends FPDF
 
 // ===================== ENTRADA: ID DEL ESTUDIANTE ===================== //
 
-$idEst = $_GET['id_est'] ?? ($_GET['id'] ?? '');
+$idEst = $_GET['id_est']
+    ?? $_GET['ID_EST']
+    ?? $_GET['id']
+    ?? '';
+
 $idEst = trim((string)$idEst);
+
+// Modo de salida: I = inline (en el navegador), D = descarga
+$modoSalida = (isset($_GET['download']) && $_GET['download'] === '1') ? 'D' : 'I';
 
 // Si no viene parámetro, mostramos un PDF con aviso
 if ($idEst === '') {

@@ -14,6 +14,7 @@
 <script type="text/javascript" src="assets/jquery/jquery.easyui.min.js"></script>
 <script type="text/javascript" src="assets/jquery/locale/easyui-lang-es.js"></script>
 
+<script type="text/javascript" src="js/validaciones.js"></script>
 <!-- Estilos para los formularios dentro de los modales -->
 <style>
     .fitem { margin-bottom: 15px; }
