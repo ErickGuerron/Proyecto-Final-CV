@@ -8,7 +8,7 @@ const Validaciones = {
     /**
      * Valida que un campo no esté vacío
      */
-    requerido: function(valor, nombreCampo) {
+    requerido: function (valor, nombreCampo) {
         if (!valor || valor.trim() === '') {
             return {
                 valido: false,
@@ -21,7 +21,7 @@ const Validaciones = {
     /**
      * Valida formato de cédula ecuatoriana (10 dígitos)
      */
-    cedula: function(cedula) {
+    cedula: function (cedula) {
         if (!cedula || cedula.trim() === '') {
             return {
                 valido: false,
@@ -49,7 +49,7 @@ const Validaciones = {
         }
 
         // Validar algoritmo de cédula ecuatoriana
-        const provincia = parseInt(cedula.substring(0, 2));
+        const provincia = parseInt(cedula.substring(0, 2), 10);
         if (provincia < 1 || provincia > 24) {
             return {
                 valido: false,
@@ -57,7 +57,7 @@ const Validaciones = {
             };
         }
 
-        const tercerDigito = parseInt(cedula.charAt(2));
+        const tercerDigito = parseInt(cedula.charAt(2), 10);
         if (tercerDigito > 5) {
             return {
                 valido: false,
@@ -70,14 +70,14 @@ const Validaciones = {
         let suma = 0;
 
         for (let i = 0; i < 9; i++) {
-            let valor = parseInt(cedula.charAt(i)) * coeficientes[i];
+            let valor = parseInt(cedula.charAt(i), 10) * coeficientes[i];
             if (valor >= 10) {
                 valor -= 9;
             }
             suma += valor;
         }
 
-        const digitoVerificador = parseInt(cedula.charAt(9));
+        const digitoVerificador = parseInt(cedula.charAt(9), 10);
         const resultado = suma % 10 === 0 ? 0 : 10 - (suma % 10);
 
         if (resultado !== digitoVerificador) {
@@ -93,7 +93,7 @@ const Validaciones = {
     /**
      * Valida formato de correo electrónico
      */
-    email: function(email) {
+    email: function (email) {
         if (!email || email.trim() === '') {
             return {
                 valido: false,
@@ -115,7 +115,7 @@ const Validaciones = {
     /**
      * Valida teléfono (10 dígitos para Ecuador)
      */
-    telefono: function(telefono) {
+    telefono: function (telefono) {
         if (!telefono || telefono.trim() === '') {
             return {
                 valido: false,
@@ -153,7 +153,7 @@ const Validaciones = {
     /**
      * Valida fecha de nacimiento (no puede ser futura y edad razonable)
      */
-    fechaNacimiento: function(fecha) {
+    fechaNacimiento: function (fecha) {
         if (!fecha || fecha.trim() === '') {
             return {
                 valido: false,
@@ -200,7 +200,7 @@ const Validaciones = {
     /**
      * Valida longitud mínima
      */
-    longitudMinima: function(valor, nombreCampo, minimo) {
+    longitudMinima: function (valor, nombreCampo, minimo) {
         if (!valor || valor.trim().length < minimo) {
             return {
                 valido: false,
@@ -213,7 +213,7 @@ const Validaciones = {
     /**
      * Valida longitud máxima
      */
-    longitudMaxima: function(valor, nombreCampo, maximo) {
+    longitudMaxima: function (valor, nombreCampo, maximo) {
         if (valor && valor.trim().length > maximo) {
             return {
                 valido: false,
@@ -226,7 +226,7 @@ const Validaciones = {
     /**
      * Valida que solo contenga letras y espacios
      */
-    soloLetras: function(valor, nombreCampo) {
+    soloLetras: function (valor, nombreCampo) {
         if (!valor || valor.trim() === '') {
             return {
                 valido: false,
@@ -252,7 +252,7 @@ const Validaciones = {
  * Validador para formulario de Estudiante
  */
 const ValidadorEstudiante = {
-    validar: function(datosFormulario) {
+    validar: function (datosFormulario) {
         const errores = [];
 
         // Validar cédula
@@ -308,10 +308,10 @@ const ValidadorEstudiante = {
 };
 
 /**
- * Validador para formulario de Curso (si se necesita en el futuro)
+ * Validador para formulario de Curso
  */
 const ValidadorCurso = {
-    validar: function(datosFormulario) {
+    validar: function (datosFormulario) {
         const errores = [];
 
         // Validar nombre del curso
@@ -344,10 +344,10 @@ const ValidadorCurso = {
 };
 
 /**
- * Validador para formulario de Inscripción (si se necesita en el futuro)
+ * Validador para formulario de Inscripción
  */
 const ValidadorInscripcion = {
-    validar: function(datosFormulario) {
+    validar: function (datosFormulario) {
         const errores = [];
 
         // Validar que se haya seleccionado estudiante
@@ -372,50 +372,64 @@ const ValidadorInscripcion = {
 // =================== UTILIDADES ===================
 
 /**
- * Muestra mensajes de error en la interfaz
+ * Muestra mensajes de error en la interfaz.
+ * - Si existe EasyUI ($.messager), usa el dialog.
+ * - Si existe showNotification (Bootstrap), lo usa.
+ * - En último caso, usa alert().
  */
 function mostrarErrores(errores) {
-    let mensaje = '<ul style="text-align:left; padding-left:20px;">';
-    errores.forEach(function(error) {
-        mensaje += '<li>' + error + '</li>';
-    });
-    mensaje += '</ul>';
+    const mensajeHtml = '<ul style="text-align:left; padding-left:20px; margin-bottom:0;">' +
+        errores.map(e => '<li>' + e + '</li>').join('') +
+        '</ul>';
 
-    $.messager.alert({
-        title: 'Errores de Validación',
-        msg: mensaje,
-        icon: 'error',
-        width: 450
-    });
+    const mensajePlano = errores.join('\n');
+
+    // EasyUI
+    if (window.$ && $.messager && $.messager.alert) {
+        $.messager.alert({
+            title: 'Errores de Validación',
+            msg: mensajeHtml,
+            icon: 'error',
+            width: 450
+        });
+        return;
+    }
+
+    // Bootstrap (tu función global de toasts)
+    if (typeof window.showNotification === 'function') {
+        window.showNotification(mensajeHtml, 'error');
+        return;
+    }
+
+    // Fallback
+    alert(mensajePlano);
 }
 
 /**
  * Obtiene los datos de un formulario jQuery EasyUI
+ * (se deja para compatibilidad con la pantalla antigua).
  */
 function obtenerDatosFormulario(idFormulario) {
+    if (!window.$) {
+        console.warn('obtenerDatosFormulario requiere jQuery/EasyUI. En Bootstrap usa FormData o elementos del DOM.');
+        return {};
+    }
+
     var form = $(idFormulario);
     var data = {};
     
-    // Obtener todos los campos del formulario
-    form.find('input[name]').each(function() {
+    form.find('input[name]').each(function () {
         var input = $(this);
         var name = input.attr('name');
         var value = '';
         
-        // Verificar si es un textbox de EasyUI
         if (input.hasClass('easyui-textbox')) {
             value = input.textbox('getValue');
-        } 
-        // Verificar si es un datebox de EasyUI
-        else if (input.hasClass('easyui-datebox')) {
+        } else if (input.hasClass('easyui-datebox')) {
             value = input.datebox('getValue');
-        }
-        // Verificar si es un combobox de EasyUI
-        else if (input.hasClass('easyui-combobox')) {
+        } else if (input.hasClass('easyui-combobox')) {
             value = input.combobox('getValue');
-        }
-        // Campo normal
-        else {
+        } else {
             value = input.val();
         }
         

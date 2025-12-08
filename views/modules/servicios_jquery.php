@@ -333,7 +333,7 @@
                        iconCls="icon-save"
                        plain="true"
                        onclick="openReportModal('cursos')">
-                        Estudiantes y Cursos
+                        Estudiantes Cursos
                     </a>
                     <a href="javascript:void(0)"
                        class="easyui-linkbutton"

@@ -11,6 +11,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <!-- Tu Hoja de Estilos Personalizada -->
     <link href="assets/css/tabla.css" rel="stylesheet">
+    <!-- Validaciones reutilizables -->
     <script src="assets/js/validaciones.js"></script>
 </head>
 
@@ -416,12 +417,53 @@
             updateTimestamp();
 
             // Buscador
-            document.getElementById('searchInput').addEventListener('keyup', function() {
-                const term = this.value.toLowerCase();
-                document.querySelectorAll('#tableBody tr').forEach(row => {
-                    row.style.display = row.textContent.toLowerCase().includes(term) ? '' : 'none';
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                searchInput.addEventListener('keyup', function() {
+                    const term = this.value.toLowerCase();
+                    document.querySelectorAll('#tableBody tr').forEach(row => {
+                        row.style.display = row.textContent.toLowerCase().includes(term) ? '' : 'none';
+                    });
                 });
-            });
+
+                // Limpiar con ESC
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') {
+                        searchInput.value = '';
+                        document.querySelectorAll('#tableBody tr').forEach(row => row.style.display = '');
+                    }
+                });
+            }
+
+            // Restricciones en tiempo real para el formulario de estudiantes
+            const inputCedula   = document.getElementById('ID_EST');
+            const inputNombre   = document.getElementById('NOM_EST');
+            const inputApellido = document.getElementById('APE_EST');
+            const inputTelefono = document.getElementById('TEL_EST');
+
+            if (inputCedula) {
+                inputCedula.addEventListener('input', function () {
+                    this.value = this.value.replace(/[^\d]/g, '').slice(0, 10);
+                });
+            }
+
+            if (inputTelefono) {
+                inputTelefono.addEventListener('input', function () {
+                    this.value = this.value.replace(/[^\d]/g, '').slice(0, 10);
+                });
+            }
+
+            if (inputNombre) {
+                inputNombre.addEventListener('input', function () {
+                    this.value = this.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '');
+                });
+            }
+
+            if (inputApellido) {
+                inputApellido.addEventListener('input', function () {
+                    this.value = this.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '');
+                });
+            }
         });
 
         // --- SISTEMA DE NOTIFICACIONES (REEMPLAZO DE ALERT) ---
@@ -450,6 +492,8 @@
 
             toastEl.addEventListener('hidden.bs.toast', () => toastEl.remove());
         }
+        // Exponer para validaciones.js
+        window.showNotification = showNotification;
 
         // --- CAMBIAR MÓDULO ---
         function loadModule(name) {
@@ -462,7 +506,7 @@
             const btn = document.getElementById('btnNew');
             if(btn && canModify) {
                 btn.innerHTML = `<i class="fas fa-plus-circle me-2"></i>${config.btnText}`;
-                btn.style.display = ''; // visible
+                btn.style.display = '';
             } else if (btn && !canModify) {
                 btn.style.display = 'none';
             }
@@ -584,7 +628,8 @@
 
             isEditing = false;
             const config = modules[currentModule];
-            document.querySelector(`#${config.modalId} form`).reset();
+            const form = document.querySelector(`#${config.modalId} form`);
+            if (form) form.reset();
             
             if(currentModule === 'courses') document.getElementById('div_id_cur').style.display = 'none';
             if(currentModule === 'students') document.getElementById('ID_EST').readOnly = false;
@@ -603,8 +648,12 @@
             const config = modules[currentModule];
             const form = document.querySelector(`#${config.modalId} form`);
             
-            for (const key in item) {
-                if(form.elements[key]) form.elements[key].value = item[key];
+            if (form) {
+                for (const key in item) {
+                    if (Object.prototype.hasOwnProperty.call(item, key) && form.elements[key]) {
+                        form.elements[key].value = item[key];
+                    }
+                }
             }
 
             if(currentModule === 'courses') {
@@ -625,13 +674,66 @@
 
             const config = modules[currentModule];
             const form = document.querySelector(`#${config.modalId} form`);
-            
-            // Validación HTML5
+            if (!form) return;
+
+            let errores = [];
+
+            // ================= VALIDACIONES PERSONALIZADAS =================
+            if (currentModule === 'students') {
+                const datosEst = {
+                    id_est: form.ID_EST.value || '',
+                    nom_est: form.NOM_EST.value || '',
+                    ape_est: form.APE_EST.value || '',
+                    tel_est: form.TEL_EST.value || '',
+                    dir_est: form.DIR_EST.value || ''
+                };
+
+                const resEst = ValidadorEstudiante.validar(datosEst);
+                if (!resEst.valido) {
+                    errores = errores.concat(resEst.errores);
+                }
+
+                const resEmail = Validaciones.email(form.COR_EST.value || '');
+                if (!resEmail.valido) {
+                    errores.push(resEmail.mensaje);
+                }
+
+                const resFecha = Validaciones.fechaNacimiento(form.FEC_NAC.value || '');
+                if (!resFecha.valido) {
+                    errores.push(resFecha.mensaje);
+                }
+            } else if (currentModule === 'courses') {
+                const datosCur = {
+                    NOM_CUR: form.NOM_CUR.value || '',
+                    DES_CUR: form.DES_CUR.value || ''
+                };
+                const resCur = ValidadorCurso.validar(datosCur);
+                if (!resCur.valido) {
+                    errores = errores.concat(resCur.errores);
+                }
+            } else if (currentModule === 'enrollments') {
+                const datosIns = {
+                    ID_EST_INS: form.ID_EST_INS.value || '',
+                    ID_CUR_INS: form.ID_CUR_INS.value || ''
+                };
+                const resIns = ValidadorInscripcion.validar(datosIns);
+                if (!resIns.valido) {
+                    errores = errores.concat(resIns.errores);
+                }
+            }
+
+            if (errores.length > 0) {
+                mostrarErrores(errores);
+                return;
+            }
+
+            // Validación HTML5 (required, type="email", etc.)
             if (!form.checkValidity()) {
                 form.reportValidity();
                 return;
             }
 
+            // ================= ENVÍO AL BACKEND =================
             const formData = new FormData(form);
             const url = isEditing ? config.urlUpdate : config.urlAdd;
 
@@ -639,7 +741,8 @@
                 .then(res => res.json())
                 .then(data => {
                     if(data.success || data.ok || (!data.error && !data.errorMsg)) {
-                        bootstrap.Modal.getInstance(document.getElementById(config.modalId)).hide();
+                        const modalInstance = bootstrap.Modal.getInstance(document.getElementById(config.modalId));
+                        if (modalInstance) modalInstance.hide();
                         fetchData();
                         showNotification('Operación realizada con éxito', 'success');
                     } else {
@@ -655,10 +758,7 @@
                 return;
             }
 
-            // 1. Guardamos el ID en la variable global
             idToDelete = id; 
-            
-            // 2. Abrimos el modal de confirmación de Bootstrap
             const deleteModalEl = document.getElementById('deleteModal');
             if (deleteModalEl) {
                 new bootstrap.Modal(deleteModalEl).show();
@@ -677,16 +777,14 @@
             const formData = new FormData();
             formData.append(config.pk, idToDelete);
 
-            // 1. Ocultar modal
             const modalInstance = bootstrap.Modal.getInstance(document.getElementById('deleteModal'));
             if (modalInstance) modalInstance.hide();
 
-            // 2. Petición al servidor
             fetch(config.urlDelete, { method: 'POST', body: formData })
                 .then(res => res.json())
                 .then(data => {
                     if(data.success || data.ok) {
-                        fetchData(); // Recargar tabla
+                        fetchData();
                         showNotification('Registro eliminado correctamente', 'success');
                     } else {
                         showNotification(data.errorMsg || 'Error al eliminar', 'error');
@@ -724,13 +822,10 @@
 
         function generarReporte() {
             showNotification('Generando reporte PDF, por favor espere...', 'info');
-            // Esta función es sobreescrita más abajo por el módulo de visor,
-            // aquí se deja únicamente como fallback visual.
         }
 
         function verEstadisticas() {
             showNotification('Cargando módulo de estadísticas...', 'info');
-            // Lógica futura (la implementación principal está en el segundo script)
         }
         
         function updateTimestamp() {
@@ -758,7 +853,6 @@
                 return reportModalInstance;
             }
 
-            // Abre el visor de reportes en el modal
             window.openReportViewer = function (url, title) {
                 const frame = document.getElementById('reportViewerFrame');
                 const titleEl = document.getElementById('reportViewerTitle');
@@ -777,13 +871,11 @@
                 modal.show();
             };
 
-            // Reporte por estudiante
             window.generarReporte = function () {
                 const searchInput = document.getElementById('searchInput');
                 const filtro = searchInput ? searchInput.value.trim() : '';
                 let idEst = filtro;
 
-                // Si no hay filtro, usar la fila seleccionada en la tabla
                 if (!idEst && window.selectedStudentId) {
                     idEst = String(window.selectedStudentId).trim();
                 }
@@ -797,19 +889,16 @@
                 openReportViewer(url, 'Reporte académico del estudiante ' + idEst);
             };
 
-            // Reporte general de estudiantes por curso
             window.generarReporteListado = function () {
                 const url = '/views/report_estudiantes_cursos.php';
                 openReportViewer(url, 'Reporte de estudiantes por curso');
             };
 
-            // Reporte de estadísticas de cursos
             window.verEstadisticas = function () {
                 const url = '/views/report_grafico_cursos.php';
                 openReportViewer(url, 'Estadísticas de cursos');
             };
 
-            // Manejo de selección de fila en la tabla para obtener ID_EST
             document.addEventListener('DOMContentLoaded', function () {
                 const tbody = document.getElementById('tableBody');
                 if (!tbody) return;
@@ -820,15 +909,12 @@
                         return;
                     }
 
-                    // Quitar selección previa
                     tbody.querySelectorAll('tr.table-active').forEach(function (tr) {
                         tr.classList.remove('table-active');
                     });
 
-                    // Marcar fila activa
                     row.classList.add('table-active');
 
-                    // Tomar la cédula de la primera celda
                     const firstCell = row.querySelector('td');
                     if (firstCell) {
                         window.selectedStudentId = firstCell.textContent.trim();
