@@ -1,0 +1,546 @@
+/* =========================================
+   VARIABLES Y TEMA TECH INDIGO (Coherente con style.css)
+   ========================================= */
+:root {
+    --color-primary-indigo: #575cbc;
+    --color-secondary-green: #65c68e;
+    --color-accent-orange: #e6924d;
+    --color-indigo-hover: #4b4ea5;
+    --color-orange-hover: #dd7a25;
+    --color-text-main: #1A202C;
+    --color-text-muted: #4A5568;
+    --color-bg-body: #F7FAFC;
+    --color-bg-card: #FFFFFF;
+    --shadow-soft: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    --shadow-hover: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    --shadow-medium: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* =========================================
+   FONDOS Y FORMAS DECORATIVAS
+   ========================================= */
+.bg-shape-wrapper {
+    position: fixed;
+    top: 0; 
+    left: 0; 
+    width: 100%; 
+    height: 100%;
+    overflow: hidden; 
+    z-index: -1; 
+    pointer-events: none;
+}
+
+.shape-blob {
+    position: absolute; 
+    border-radius: 50%; 
+    filter: blur(80px); 
+    opacity: 0.06;
+    animation: float 20s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(30px, -30px) scale(1.05); }
+}
+
+.blob-1 { 
+    top: -10%; 
+    right: -5%; 
+    width: 500px; 
+    height: 500px; 
+    background: linear-gradient(135deg, var(--color-primary-indigo), var(--color-indigo-hover));
+}
+
+.blob-2 { 
+    bottom: -5%; 
+    left: -10%; 
+    width: 400px; 
+    height: 400px; 
+    background: linear-gradient(135deg, var(--color-secondary-green), #48bb78);
+}
+
+/* =========================================
+   COMPONENTES DE TARJETA
+   ========================================= */
+.card-custom {
+    background: var(--color-bg-card);
+    border: 1px solid rgba(87, 92, 188, 0.08);
+    border-radius: 16px;
+    box-shadow: var(--shadow-soft);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+}
+
+.card-custom:hover {
+    box-shadow: var(--shadow-hover);
+    border-color: rgba(87, 92, 188, 0.15);
+}
+
+/* Encabezado de tarjeta mejorado */
+.card-custom .card-body {
+    position: relative;
+}
+
+.card-custom h2 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--color-primary-indigo), var(--color-indigo-hover));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* =========================================
+   BARRA DE HERRAMIENTAS (Toolbar)
+   ========================================= */
+.toolbar-section {
+    background: linear-gradient(135deg, rgba(87, 92, 188, 0.03), rgba(101, 198, 142, 0.02));
+    border-radius: 12px;
+    padding: 1rem;
+}
+
+/* Botones de la toolbar */
+.btn-success {
+    background: linear-gradient(135deg, var(--color-secondary-green), #48bb78);
+    border: none;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(101, 198, 142, 0.25);
+    transition: all 0.3s ease;
+}
+
+.btn-success:hover {
+    background: linear-gradient(135deg, #48bb78, var(--color-secondary-green));
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(101, 198, 142, 0.35);
+}
+
+.btn-outline-secondary,
+.btn-outline-info {
+    border-width: 2px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-outline-secondary {
+    border-color: var(--color-text-muted);
+    color: var(--color-text-muted);
+}
+
+.btn-outline-secondary:hover {
+    background-color: var(--color-text-muted);
+    color: white;
+    transform: translateY(-2px);
+}
+
+.btn-outline-info {
+    border-color: var(--color-primary-indigo);
+    color: var(--color-primary-indigo);
+}
+
+.btn-outline-info:hover {
+    background-color: var(--color-primary-indigo);
+    color: white;
+    transform: translateY(-2px);
+}
+
+/* =========================================
+   BUSCADOR MEJORADO
+   ========================================= */
+.input-group-text-custom {
+    border-radius: 50px 0 0 50px;
+    border: 2px solid #e2e8f0;
+    border-right: none;
+    background-color: white;
+    color: var(--color-primary-indigo);
+    transition: all 0.3s ease;
+}
+
+.search-input {
+    border-radius: 0 50px 50px 0;
+    border: 2px solid #e2e8f0;
+    border-left: none;
+    padding: 0.6rem 1.5rem;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+}
+
+.search-input:focus {
+    box-shadow: 0 0 0 4px rgba(87, 92, 188, 0.12);
+    border-color: var(--color-primary-indigo);
+    outline: none;
+}
+
+.search-input:focus + .input-group-text-custom,
+.input-group:focus-within .input-group-text-custom {
+    border-color: var(--color-primary-indigo);
+    color: var(--color-primary-indigo);
+}
+
+/* =========================================
+   TABLA PRINCIPAL - DISEÑO MODERNO
+   ========================================= */
+.table-wrapper {
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.table-custom {
+    margin-bottom: 0;
+    border-collapse: separate;
+    border-spacing: 0;
+    width: 100%;
+}
+
+/* CABECERA DE TABLA (Thead) */
+.table-custom thead {
+    background: linear-gradient(135deg, var(--color-primary-indigo), var(--color-indigo-hover));
+    position: relative;
+}
+
+.table-custom thead::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--color-secondary-green), var(--color-accent-orange));
+}
+
+.table-custom thead th {
+    color: white !important; /* Forzar color blanco */
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 1px;
+    border: none;
+    padding: 1.2rem 1rem;
+    vertical-align: middle;
+    white-space: nowrap;
+}
+
+/* Asegurar que los iconos también sean blancos */
+.table-custom thead th i {
+    color: white !important;
+    opacity: 0.9;
+}
+
+/* CUERPO DE TABLA (Tbody) */
+.table-custom tbody {
+    background-color: var(--color-bg-card);
+}
+
+.table-custom tbody tr {
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    border-bottom: 1px solid #f0f3f7;
+}
+
+.table-custom tbody tr:last-child {
+    border-bottom: none;
+}
+
+/* Efecto Hover Mejorado */
+.table-custom tbody tr:hover {
+    background: linear-gradient(90deg, 
+        rgba(87, 92, 188, 0.04), 
+        rgba(101, 198, 142, 0.03)
+    );
+    transform: scale(1.005);
+    box-shadow: 0 2px 8px rgba(87, 92, 188, 0.08);
+    cursor: pointer;
+}
+
+.table-custom tbody td {
+    padding: 1rem;
+    vertical-align: middle;
+    color: var(--color-text-main);
+    font-size: 0.92rem;
+    border: none;
+}
+
+/* Primera columna (Cédula) destacada */
+.table-custom tbody td:first-child {
+    font-weight: 700;
+    color: var(--color-primary-indigo);
+    font-family: 'Courier New', monospace;
+    letter-spacing: 0.3px;
+}
+
+/* =========================================
+   BOTONES DE ACCIÓN (Editar/Eliminar)
+   ========================================= */
+.btn-circle {
+    width: 36px; 
+    height: 36px;
+    padding: 0;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    border: none;
+    margin-left: 6px;
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+/* Botón Editar */
+.btn-action-edit {
+    background-color: rgba(87, 92, 188, 0.1);
+    color: var(--color-primary-indigo);
+    border: 2px solid transparent;
+}
+
+.btn-action-edit:hover {
+    background-color: var(--color-primary-indigo);
+    color: white;
+    transform: scale(1.15) rotate(10deg);
+    box-shadow: 0 4px 12px rgba(87, 92, 188, 0.35);
+}
+
+/* Botón Eliminar */
+.btn-action-delete {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    border: 2px solid transparent;
+}
+
+.btn-action-delete:hover {
+    background-color: #ef4444;
+    color: white;
+    transform: scale(1.15) rotate(-10deg);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.35);
+}
+
+/* =========================================
+   ESTADOS DE CARGA Y VACÍO
+   ========================================= */
+.loading-state,
+.empty-state {
+    padding: 3rem 1rem;
+    text-align: center;
+    color: var(--color-text-muted);
+}
+
+.loading-state i {
+    font-size: 2rem;
+    color: var(--color-primary-indigo);
+    margin-bottom: 1rem;
+}
+
+.empty-state i {
+    font-size: 3rem;
+    color: var(--color-text-muted);
+    opacity: 0.3;
+    margin-bottom: 1rem;
+}
+
+/* =========================================
+   MODAL MEJORADO
+   ========================================= */
+.modal-content {
+    border-radius: 20px;
+    border: none;
+    box-shadow: var(--shadow-hover);
+    overflow: hidden;
+}
+
+.modal-header {
+    background: linear-gradient(135deg, 
+        rgba(87, 92, 188, 0.05), 
+        rgba(101, 198, 142, 0.03)
+    );
+    border-bottom: 2px solid rgba(87, 92, 188, 0.1);
+    padding: 1.5rem;
+}
+
+.modal-title {
+    font-weight: 700;
+    font-size: 1.4rem;
+    background: linear-gradient(135deg, var(--color-primary-indigo), var(--color-indigo-hover));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.modal-body {
+    padding: 2rem;
+}
+
+/* Inputs flotantes del modal */
+.form-floating > .form-control:focus ~ label {
+    color: var(--color-primary-indigo);
+}
+
+.form-floating > .form-control:focus {
+    border-color: var(--color-primary-indigo);
+    box-shadow: 0 0 0 4px rgba(87, 92, 188, 0.12);
+}
+
+.form-control {
+    border-radius: 12px;
+    border: 2px solid #e2e8f0;
+    transition: all 0.3s ease;
+}
+
+/* Botones del modal */
+.modal-footer {
+    padding: 1.5rem;
+    background-color: #f9fafb;
+}
+
+.modal-footer .btn-primary {
+    background: linear-gradient(135deg, var(--color-primary-indigo), var(--color-indigo-hover));
+    border: none;
+    font-weight: 700;
+    box-shadow: 0 4px 12px rgba(87, 92, 188, 0.25);
+    transition: all 0.3s ease;
+}
+
+.modal-footer .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(87, 92, 188, 0.35);
+}
+
+/* =========================================
+   RESPONSIVE DESIGN
+   ========================================= */
+@media (max-width: 768px) {
+    .table-custom thead th {
+        font-size: 0.7rem;
+        padding: 0.8rem 0.5rem;
+    }
+    
+    .table-custom tbody td {
+        font-size: 0.85rem;
+        padding: 0.8rem 0.5rem;
+    }
+    
+    .btn-circle {
+        width: 32px;
+        height: 32px;
+        font-size: 0.8rem;
+    }
+    
+    .card-custom h2 {
+        font-size: 1.4rem;
+    }
+}
+
+/* =========================================
+   ANIMACIONES SUAVES
+   ========================================= */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.table-custom tbody tr {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+/* Efecto de pulso para notificaciones */
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+.notification-badge {
+    animation: pulse 2s infinite;
+}
+/* =========================================
+   FIX URGENTE - TEXTO INVISIBLE
+   Agrega esto DESPUÉS de tabla.css en tu HTML
+   ========================================= */
+
+/* Forzar que todo el texto del tbody sea visible */
+.table-custom tbody,
+.table-custom tbody tr,
+.table-custom tbody td,
+.table-custom tbody td *,
+.table-custom tbody span,
+.table-custom tbody i {
+    color: #1A202C !important;
+}
+
+/* Primera columna (cédula) en índigo */
+.table-custom tbody td:first-child {
+    color: #575cbc !important;
+    font-weight: 700 !important;
+}
+
+/* Iconos en gris */
+.table-custom tbody i.fa-phone-alt,
+.table-custom tbody i.fa-envelope,
+.table-custom tbody i.fa-map-marker-alt,
+.table-custom tbody i.fa-calendar {
+    color: #718096 !important;
+}
+
+/* Encabezados en blanco */
+.table-custom thead th,
+.table-custom thead th *,
+.table-custom thead i {
+    color: rgb(0, 0, 0) !important;
+}
+
+/* Asegurar que los estados de carga también sean visibles */
+.loading-state,
+.loading-state *,
+.empty-state,
+.empty-state * {
+    color: #4A5568 !important;
+}
+
+.loading-state i {
+    color: #575cbc !important;
+}
+
+/* Estados de error en rojo */
+.text-danger,
+.text-danger * {
+    color: #ef4444 !important;
+}
+
+/* =========================================
+   BOTONES DE NAVEGACIÓN (TABS/PILLS) - FIX VISIBILIDAD
+   ========================================= */
+.nav-pills {
+    background: transparent;
+    padding: 5px;
+}
+
+.nav-pills .nav-link {
+    /* Fondo gris claro por defecto para que se vea el "botón" */
+    background-color: #e9ecef !important; 
+    /* Texto oscuro forzado */
+    color: #495057 !important;
+    border: 1px solid #dee2e6;
+    margin-right: 10px;
+    font-weight: 700;
+    transition: all 0.3s ease;
+}
+
+.nav-pills .nav-link:hover {
+    background-color: #dee2e6 !important;
+    color: #575cbc !important; /* Color Indigo al pasar el mouse */
+    transform: translateY(-2px);
+}
+
+.nav-pills .nav-link.active {
+    /* Gradiente Indigo cuando está activo */
+    background: linear-gradient(135deg, #575cbc, #4b4ea5) !important;
+    color: #ffffff !important;
+    border-color: transparent;
+    box-shadow: 0 4px 12px rgba(87, 92, 188, 0.3);
+}
+
+.nav-pills .nav-link i {
+    margin-right: 8px;
+}
